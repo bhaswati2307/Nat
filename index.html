@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NatHerb – Fresh Ayurvedic Beauty & Wellness</title>
+  <meta name="description" content="100% Natural Ayurvedic beauty & wellness products. Made fresh everyday with zero chemicals.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+  <style>
+    /* ── HOMEPAGE EXTRAS ── */
+    .collections-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .collection-card {
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      position: relative;
+      aspect-ratio: 4/3;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .collection-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+    .collection-card img { width:100%;height:100%;object-fit:cover; transition:transform 0.4s; }
+    .collection-card:hover img { transform: scale(1.05); }
+    .collection-card-overlay {
+      position:absolute; inset:0;
+      background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 55%);
+      display:flex; align-items:flex-end; padding:20px;
+    }
+    .collection-card-overlay h3 { color:white; font-family:var(--font-heading); font-size:1.2rem; margin-bottom:4px; }
+    .collection-card-overlay p { color:rgba(255,255,255,0.8); font-size:0.8rem; }
+
+    /* ── WHY US GRID ── */
+    .why-us-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+    .why-card {
+      text-align: center;
+      padding: 28px 20px;
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-light);
+      transition: var(--transition);
+    }
+    .why-card:hover { box-shadow: var(--shadow-md); transform: translateY(-4px); }
+    .why-card .icon { font-size: 2.4rem; margin-bottom: 14px; display: block; }
+    .why-card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 8px; color:var(--text-dark); }
+    .why-card p { font-size: 0.83rem; color: var(--text-light); line-height: 1.6; }
+
+    /* ── TESTIMONIALS ── */
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .testimonial-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      border: 1px solid var(--border-light);
+      position: relative;
+    }
+    .testimonial-card::before {
+      content: '"';
+      font-family: var(--font-heading);
+      font-size: 4rem;
+      color: var(--primary-light);
+      opacity: 0.3;
+      position: absolute;
+      top: 8px;
+      left: 20px;
+      line-height: 1;
+    }
+    .testimonial-text { font-size: 0.9rem; line-height: 1.7; color: var(--text-medium); margin-bottom: 16px; padding-top: 10px; }
+    .testimonial-author { display: flex; align-items: center; gap: 12px; }
+    .testimonial-avatar {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: var(--bg-cream);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      color: var(--primary);
+      font-weight: 700;
+      font-family: var(--font-heading);
+      flex-shrink: 0;
+    }
+    .testimonial-name { font-size: 0.9rem; font-weight: 600; }
+    .testimonial-loc { font-size: 0.75rem; color: var(--text-light); }
+
+    /* ── CONCERN CATEGORIES ── */
+    .concern-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 14px;
+    }
+    .concern-item {
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition);
+      padding: 16px 10px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border-light);
+      background: var(--white);
+    }
+    .concern-item:hover { border-color: var(--primary); background: var(--bg-cream); transform: translateY(-2px); }
+    .concern-icon { font-size: 2rem; margin-bottom: 8px; display: block; }
+    .concern-label { font-size: 0.8rem; font-weight: 500; color: var(--text-medium); }
+
+    /* ── BANNER MID ── */
+    .mid-banner {
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      position: relative;
+      height: 300px;
+    }
+    .mid-banner img { width:100%;height:100%;object-fit:cover; }
+    .mid-banner-overlay {
+      position:absolute; inset:0;
+      background:linear-gradient(90deg, rgba(44,24,16,0.7) 0%, transparent 65%);
+      display:flex; align-items:center; padding:50px;
+    }
+
+    /* ── INGREDIENT SECTION ── */
+    .ingredient-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
+    }
+    .ingredient-card {
+      text-align:center;
+      cursor:pointer;
+      transition: var(--transition);
+    }
+    .ingredient-img {
+      width:100%; aspect-ratio:1;
+      border-radius:50%;
+      overflow:hidden;
+      border:3px solid var(--border-light);
+      transition:var(--transition);
+      margin-bottom:10px;
+    }
+    .ingredient-card:hover .ingredient-img { border-color:var(--primary); }
+    .ingredient-img img { width:100%;height:100%;object-fit:cover; }
+    .ingredient-name { font-size:0.85rem;font-weight:600;color:var(--text-dark); }
+    .ingredient-benefit { font-size:0.75rem;color:var(--text-light); }
+
+    /* ─ STATS BANNER ─ */
+    .stats-section {
+      background:linear-gradient(135deg, var(--primary-dark) 0%, #6B3A1C 100%);
+      padding:50px 0;
+      color:white;
+    }
+    .stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:20px; text-align:center; }
+    .stat-number { font-family:var(--font-heading); font-size:2.5rem; font-weight:700; margin-bottom:4px; }
+    .stat-label { font-size:0.9rem; opacity:0.85; }
+
+    @media(max-width:900px) {
+      .collections-grid { grid-template-columns:1fr 1fr; }
+      .why-us-grid { grid-template-columns:1fr 1fr; }
+      .testimonials-grid { grid-template-columns:1fr; }
+      .concern-grid { grid-template-columns:repeat(3,1fr); }
+      .ingredient-grid { grid-template-columns:repeat(3,1fr); }
+      .stats-grid { grid-template-columns:repeat(2,1fr); }
+    }
+    @media(max-width:600px) {
+      .collections-grid { grid-template-columns:1fr; }
+      .concern-grid { grid-template-columns:repeat(2,1fr); }
+      .ingredient-grid { grid-template-columns:repeat(2,1fr); }
+      .stats-grid { grid-template-columns:repeat(2,1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ANNOUNCEMENT BAR -->
+<div class="announcement-bar">
+  <i class="fas fa-gift"></i>
+  <span>Extra <strong>Rs.250 OFF</strong> on your 1st Order above Rs.999 | Use Code:</span>
+  <span class="coupon-code" onclick="copyCode('NEWHABIT250')">NEWHABIT250</span>
+  <span>|</span>
+  <i class="fas fa-truck"></i>
+  <span>FREE Shipping above Rs.599</span>
+</div>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="header-inner">
+    <!-- Logo -->
+    <a href="index.html" class="logo">
+      <div>
+        <div class="logo-text">Nat<span>Herb</span></div>
+        <div class="logo-tagline">Fresh Ayurveda</div>
+      </div>
+    </a>
+
+    <!-- Main Nav -->
+    <nav class="main-nav">
+      <ul class="nav-list">
+        <li class="nav-item">
+          <a href="shop.html?category=trending" class="nav-link">🔥 Trending</a>
+        </li>
+        <li class="nav-item">
+          <a href="shop.html?category=hair" class="nav-link">Hair <i class="fas fa-chevron-down" style="font-size:.7rem"></i></a>
+          <div class="nav-dropdown">
+            <a href="shop.html?category=hair&sub=shampoos">Shampoos</a>
+            <a href="shop.html?category=hair&sub=hair-oils">Hair Oils</a>
+            <a href="shop.html?category=hair&sub=hair-masks">Hair Masks</a>
+            <a href="shop.html?category=hair&sub=serums">Serums & Sprays</a>
+            <a href="shop.html?category=hair&sub=hair-color">Hair Color</a>
+          </div>
+        </li>
+        <li class="nav-item">
+          <a href="shop.html?category=face" class="nav-link">Face <i class="fas fa-chevron-down" style="font-size:.7rem"></i></a>
+          <div class="nav-dropdown">
+            <a href="shop.html?category=face&sub=cleansers">Face Wash</a>
+            <a href="shop.html?category=face&sub=moisturisers">Moisturisers</a>
+            <a href="shop.html?category=face&sub=serums">Serums</a>
+            <a href="shop.html?category=face&sub=face-packs">Face Packs</a>
+            <a href="shop.html?category=face&sub=scrubs">Scrubs</a>
+          </div>
+        </li>
+        <li class="nav-item">
+          <a href="shop.html?category=body" class="nav-link">Body</a>
+        </li>
+        <li class="nav-item">
+          <a href="shop.html" class="nav-link">All Products</a>
+        </li>
+        <li class="nav-item">
+          <a href="shop.html?tag=new_launch" class="nav-link" style="color:var(--green)">New Launches</a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Actions -->
+    <div class="header-actions">
+      <button class="header-action-btn" id="search-btn" title="Search">
+        <i class="fas fa-search"></i>
+      </button>
+      <a href="wishlist.html" class="header-action-btn" title="Wishlist">
+        <i class="far fa-heart"></i>
+        <span class="wishlist-count">0</span>
+      </a>
+      <a href="account.html" class="header-action-btn" title="Account">
+        <i class="far fa-user"></i>
+      </a>
+      <button class="header-action-btn" id="cart-btn" title="Cart">
+        <i class="fas fa-shopping-bag"></i>
+        <span class="cart-count">0</span>
+      </button>
+      <div class="header-hamburger" id="hamburger-btn" style="display:none">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Category Nav -->
+  <div class="category-nav">
+    <div class="category-nav-inner">
+      <div class="category-chip active" onclick="window.location='shop.html?category=trending'">
+        <div class="category-chip-img"><img src="https://images.unsplash.com/photo-1607006344380-b6775a0824a7?w=60&h=60&fit=crop" alt="Trending"></div>
+        <span class="category-chip-label">Trending</span>
+      </div>
+      <div class="category-chip" onclick="window.location='shop.html?category=hair'">
+        <div class="category-chip-img"><img src="https://images.unsplash.com/photo-1585515320310-259814833e62?w=60&h=60&fit=crop" alt="Hair"></div>
+        <span class="category-chip-label">Hair</span>
+      </div>
+      <div class="category-chip" onclick="window.location='shop.html?category=face'">
+        <div class="category-chip-img"><img src="https://images.unsplash.com/photo-1556228720-195a672e8a03?w=60&h=60&fit=crop" alt="Face"></div>
+        <span class="category-chip-label">Face</span>
+      </div>
+      <div class="category-chip" onclick="window.location='shop.html?category=body'">
+        <div class="category-chip-img"><img src="https://images.unsplash.com/photo-1607006344380-b6775a0824a7?w=60&h=60&fit=crop" alt="Body"></div>
+        <span class="category-chip-label">Body</span>
+      </div>
+      <div class="category-chip" onclick="window.location='skin-quiz.html'">
+        <div class="category-chip-img"><img src="https://images.unsplash.com/photo-1591370874773-6702e8f12fd8?w=60&h=60&fit=crop" alt="Skin Quiz"></div>
+        <span class="category-chip-label">Skin Quiz</span>
+      </div>
+      <div class="category-chip" onclick="window.location='shop.html?category=hair&sub=hair-oils'">
+        <div class="category-chip-img"><img src="https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=60&h=60&fit=crop" alt="Hair Oils"></div>
+        <span class="category-chip-label">Hair Oils</span>
+      </div>
+      <div class="category-chip" onclick="window.location='shop.html?category=face&sub=serums'">
+        <div class="category-chip-img"><img src="https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=60&h=60&fit=crop" alt="Serums"></div>
+        <span class="category-chip-label">Serums</span>
+      </div>
+      <div class="category-chip" onclick="window.location='shop.html?tag=new_launch'">
+        <div class="category-chip-img"><img src="https://images.unsplash.com/photo-1552489256-2d05bcc3ee6c?w=60&h=60&fit=crop" alt="New"></div>
+        <span class="category-chip-label">New 🆕</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- MOBILE MENU OVERLAY -->
+<div id="mobile-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9998;display:none"></div>
+<div class="mobile-menu" id="mobile-menu">
+  <span class="mobile-nav-close" id="mobile-menu-close">✕</span>
+  <div class="logo" style="margin-bottom:20px">
+    <div class="logo-text" style="font-size:1.4rem">Nat<span style="color:var(--green)">Herb</span></div>
+  </div>
+  <a href="index.html" class="mobile-nav-link">🏠 Home</a>
+  <a href="shop.html" class="mobile-nav-link">🛍 All Products</a>
+  <a href="shop.html?category=hair" class="mobile-nav-link">💆 Hair</a>
+  <a href="shop.html?category=face" class="mobile-nav-link">✨ Face</a>
+  <a href="shop.html?category=body" class="mobile-nav-link">🌿 Body</a>
+  <a href="shop.html?tag=new_launch" class="mobile-nav-link">🆕 New Launches</a>
+  <a href="account.html" class="mobile-nav-link">👤 Account</a>
+  <a href="orders.html" class="mobile-nav-link">📦 My Orders</a>
+  <a href="support.html" class="mobile-nav-link">💬 Support</a>
+</div>
+
+<!-- SEARCH OVERLAY -->
+<div class="search-overlay" id="search-overlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <i class="fas fa-search" style="color:var(--text-light)"></i>
+      <input type="text" id="search-input" placeholder="Search for products, ingredients...">
+      <button id="search-close-btn" style="color:var(--text-light);font-size:1.1rem">✕</button>
+    </div>
+    <div style="margin-top:10px;font-size:0.8rem;color:var(--text-light)">
+      Popular: <a href="shop.html?search=henna" style="color:var(--primary)">Henna</a>, 
+      <a href="shop.html?search=rosemary" style="color:var(--primary)">Rosemary</a>, 
+      <a href="shop.html?search=ubtan" style="color:var(--primary)">Ubtan</a>
+    </div>
+    <div id="search-results"></div>
+  </div>
+</div>
+
+<!-- CART SIDEBAR -->
+<div class="cart-overlay" id="cart-overlay"></div>
+<aside class="cart-sidebar" id="cart-sidebar">
+  <div class="cart-header">
+    <h2><i class="fas fa-shopping-bag" style="color:var(--primary);margin-right:8px"></i>Your Cart</h2>
+    <button class="cart-close-btn" id="cart-close-btn"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="cart-items" id="cart-items-list">
+    <!-- items rendered by JS -->
+  </div>
+  <div class="cart-empty" id="cart-empty" style="display:none">
+    <i class="fas fa-shopping-bag"></i>
+    <p style="font-weight:600;margin-bottom:8px">Your cart is empty</p>
+    <p style="font-size:.85rem;margin-bottom:20px">Add some amazing products!</p>
+    <a href="shop.html" class="btn btn-primary btn-sm" onclick="closeCart()">Shop Now</a>
+  </div>
+  <div class="cart-footer">
+    <div id="coupon-applied-badge" class="coupon-applied" style="display:none">
+      <span class="coupon-text"></span>
+      <span class="coupon-remove" id="remove-coupon-btn">✕ Remove</span>
+    </div>
+    <div class="cart-coupon">
+      <input type="text" id="coupon-input" placeholder="Enter coupon code" style="text-transform:uppercase">
+      <button class="btn btn-outline-dark btn-sm" id="apply-coupon-btn">Apply</button>
+    </div>
+    <div class="cart-summary-row"><span>Subtotal</span><span class="cart-subtotal">₹0</span></div>
+    <div class="cart-summary-row" style="color:var(--green)"><span>Discount</span><span class="cart-discount">₹0</span></div>
+    <div class="cart-summary-row"><span>Shipping</span><span class="cart-shipping">₹99</span></div>
+    <div class="cart-summary-row total"><span>Total</span><span class="cart-total">₹0</span></div>
+    <a href="checkout.html" class="btn btn-primary btn-block" style="margin-top:14px" onclick="closeCart()">
+      <i class="fas fa-lock"></i> Proceed to Checkout
+    </a>
+    <p style="text-align:center;font-size:0.75rem;color:var(--text-light);margin-top:10px">
+      <i class="fas fa-shield-alt"></i> Secure checkout • 7-day returns
+    </p>
+  </div>
+</aside>
+
+<!-- ============= HERO SECTION ============= -->
+<section class="hero-section">
+  <div class="hero-slider">
+    <!-- Slide 1 -->
+    <div class="hero-slide active">
+      <img src="https://images.unsplash.com/photo-1556228720-195a672e8a03?w=1400&h=500&fit=crop" alt="Fresh Ayurveda">
+      <div class="hero-overlay">
+        <div class="hero-content">
+          <span class="hero-badge">🌿 100% Natural & Fresh</span>
+          <h1 class="hero-title">Breathe Life Into Your Beauty</h1>
+          <p class="hero-subtitle">Fresh Ayurvedic formulations with zero chemicals. Made daily in our kitchen with ancient wisdom.</p>
+          <div class="hero-cta">
+            <a href="shop.html" class="btn btn-primary btn-lg">Shop Now</a>
+            <a href="skin-quiz.html" class="btn btn-outline btn-lg">Find My Routine</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Slide 2 -->
+    <div class="hero-slide">
+      <img src="https://images.unsplash.com/photo-1585515320310-259814833e62?w=1400&h=500&fit=crop" alt="Hair Care">
+      <div class="hero-overlay">
+        <div class="hero-content">
+          <span class="hero-badge">✨ NEW LAUNCH</span>
+          <h1 class="hero-title">Fresh Hair Jal Sprays</h1>
+          <p class="hero-subtitle">Rosemary, Hibiscus, Methi — pure botanical water for your scalp. No alcohol, no preservatives.</p>
+          <div class="hero-cta">
+            <a href="shop.html?category=hair&sub=serums" class="btn btn-primary btn-lg">Explore Hair Care</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Slide 3 -->
+    <div class="hero-slide">
+      <img src="https://images.unsplash.com/photo-1591370874773-6702e8f12fd8?w=1400&h=500&fit=crop" alt="Face Glow">
+      <div class="hero-overlay">
+        <div class="hero-content">
+          <span class="hero-badge">🏆 Award Winning</span>
+          <h1 class="hero-title">Kumkumadi Glow Serum</h1>
+          <p class="hero-subtitle">16 precious herbs. One legendary serum. Your radiance, redefined with pure saffron & manjistha.</p>
+          <div class="hero-cta">
+            <a href="product.html?slug=saffron-kumkumadi-serum" class="btn btn-primary btn-lg">Shop Serum</a>
+            <a href="shop.html?category=face" class="btn btn-outline btn-lg">All Face Care</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button class="slider-arrow prev" id="slider-prev"><i class="fas fa-chevron-left"></i></button>
+    <button class="slider-arrow next" id="slider-next"><i class="fas fa-chevron-right"></i></button>
+    <div class="slider-dots">
+      <div class="slider-dot active"></div>
+      <div class="slider-dot"></div>
+      <div class="slider-dot"></div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES STRIP -->
+<div class="features-strip">
+  <div class="container">
+    <div class="features-grid">
+      <div class="feature-item">
+        <span class="feature-icon">🌿</span>
+        <div class="feature-text"><h4>100% Natural</h4><p>No chemicals, no preservatives</p></div>
+      </div>
+      <div class="feature-item">
+        <span class="feature-icon">🍃</span>
+        <div class="feature-text"><h4>Made Fresh Daily</h4><p>Prepared in our Ayurvedic kitchen</p></div>
+      </div>
+      <div class="feature-item">
+        <span class="feature-icon">🔬</span>
+        <div class="feature-text"><h4>Clinically Tested</h4><p>Proven efficacy & safety</p></div>
+      </div>
+      <div class="feature-item">
+        <span class="feature-icon">🚚</span>
+        <div class="feature-text"><h4>Free Shipping</h4><p>On orders above ₹599</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TRENDING PRODUCTS -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">Customer Favourites</div>
+      <h2 class="section-title">Popular & Trending</h2>
+      <p class="section-subtitle">Breathe Life Into Your Beauty with Fresh Ayurveda</p>
+    </div>
+    <div class="products-row" id="trending-products">
+      <div style="display:flex;gap:20px;width:100%;justify-content:center;padding:40px">
+        <div class="loading-spinner"></div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:28px">
+      <a href="shop.html?category=trending" class="btn btn-outline-dark">View All Trending <i class="fas fa-arrow-right"></i></a>
+    </div>
+  </div>
+</section>
+
+<!-- MID BANNER -->
+<section class="section-sm">
+  <div class="container">
+    <div class="mid-banner">
+      <img src="https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=1400&h=300&fit=crop" alt="Hair Care Collection">
+      <div class="mid-banner-overlay">
+        <div style="max-width:480px;color:white">
+          <div class="hero-badge">Limited Time</div>
+          <h2 style="font-family:var(--font-heading);font-size:2rem;margin:10px 0">Complete Hair Care Ritual</h2>
+          <p style="opacity:.85;margin-bottom:20px;font-size:.95rem">From oil to shampoo to serum — everything your hair needs, sourced from nature's finest.</p>
+          <a href="shop.html?category=hair" class="btn btn-primary">Explore Hair Care</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NEW LAUNCHES -->
+<section class="section" style="background:var(--bg-light)">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">Just Arrived</div>
+      <h2 class="section-title">Fresh From Our Kitchen!</h2>
+      <p class="section-subtitle">Our newest formulations crafted with ancient Ayurvedic recipes</p>
+    </div>
+    <div class="products-row" id="new-products">
+      <div style="display:flex;gap:20px;width:100%;justify-content:center;padding:40px">
+        <div class="loading-spinner"></div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:28px">
+      <a href="shop.html?tag=new_launch" class="btn btn-outline-dark">See All New Arrivals <i class="fas fa-arrow-right"></i></a>
+    </div>
+  </div>
+</section>
+
+<!-- SHOP BY CONCERN -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">Personalized Solutions</div>
+      <h2 class="section-title">Shop By Concern</h2>
+      <p class="section-subtitle">Find products tailored to your specific skin & hair needs</p>
+    </div>
+    <div class="concern-grid">
+      <a href="shop.html?concern=hair-fall" class="concern-item">
+        <span class="concern-icon">💧</span>
+        <span class="concern-label">Hair Fall</span>
+      </a>
+      <a href="shop.html?concern=dandruff" class="concern-item">
+        <span class="concern-icon">❄️</span>
+        <span class="concern-label">Dandruff</span>
+      </a>
+      <a href="shop.html?concern=acne" class="concern-item">
+        <span class="concern-icon">🎯</span>
+        <span class="concern-label">Acne</span>
+      </a>
+      <a href="shop.html?concern=dryness" class="concern-item">
+        <span class="concern-icon">💦</span>
+        <span class="concern-label">Dryness</span>
+      </a>
+      <a href="shop.html?concern=pigmentation" class="concern-item">
+        <span class="concern-icon">🌟</span>
+        <span class="concern-label">Pigmentation</span>
+      </a>
+      <a href="shop.html?concern=aging" class="concern-item">
+        <span class="concern-icon">⏰</span>
+        <span class="concern-label">Anti-Aging</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- COLLECTIONS -->
+<section class="section section-sm" style="padding-top:20px">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">Curated for You</div>
+      <h2 class="section-title">Must-Have Collections</h2>
+    </div>
+    <div class="collections-grid">
+      <div class="collection-card" onclick="window.location='shop.html?category=hair'">
+        <img src="https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?w=400&h=300&fit=crop" alt="Hair Collection">
+        <div class="collection-card-overlay">
+          <div>
+            <h3>Hair Care</h3>
+            <p>Oils · Shampoos · Masks · Sprays</p>
+          </div>
+        </div>
+      </div>
+      <div class="collection-card" onclick="window.location='shop.html?category=face'">
+        <img src="https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&h=300&fit=crop" alt="Face Collection">
+        <div class="collection-card-overlay">
+          <div>
+            <h3>Face Care</h3>
+            <p>Serums · Moisturisers · Face Wash</p>
+          </div>
+        </div>
+      </div>
+      <div class="collection-card" onclick="window.location='shop.html?category=body'">
+        <img src="https://images.unsplash.com/photo-1607006344380-b6775a0824a7?w=400&h=300&fit=crop" alt="Body Collection">
+        <div class="collection-card-overlay">
+          <div>
+            <h3>Body Care</h3>
+            <p>Lotions · Scrubs · Body Oils</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS SECTION -->
+<section class="stats-section">
+  <div class="container">
+    <div class="stats-grid">
+      <div>
+        <div class="stat-number" id="stat-customers">5M+</div>
+        <div class="stat-label">Happy Customers</div>
+      </div>
+      <div>
+        <div class="stat-number">100%</div>
+        <div class="stat-label">Natural Ingredients</div>
+      </div>
+      <div>
+        <div class="stat-number">150+</div>
+        <div class="stat-label">Ayurvedic Products</div>
+      </div>
+      <div>
+        <div class="stat-number">4.8⭐</div>
+        <div class="stat-label">Average Rating</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY US -->
+<section class="section" style="background:var(--bg-light)">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">Our Promise</div>
+      <h2 class="section-title">Why NatHerb?</h2>
+    </div>
+    <div class="why-us-grid">
+      <div class="why-card">
+        <span class="icon">🌿</span>
+        <h3>Zero Chemicals</h3>
+        <p>No SLS, parabens, silicones or artificial fragrances. Just pure nature.</p>
+      </div>
+      <div class="why-card">
+        <span class="icon">🍃</span>
+        <h3>Made Fresh Daily</h3>
+        <p>Freshly prepared in our Ayurvedic kitchen every single day — no stale stock.</p>
+      </div>
+      <div class="why-card">
+        <span class="icon">🔬</span>
+        <h3>Clinically Proven</h3>
+        <p>All formulations are tested and certified by leading dermatologists.</p>
+      </div>
+      <div class="why-card">
+        <span class="icon">🐇</span>
+        <h3>Cruelty-Free</h3>
+        <p>100% vegan and cruelty-free. We never test on animals.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">Real Results</div>
+      <h2 class="section-title">What Our Customers Say</h2>
+    </div>
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <div class="stars" style="margin-bottom:10px;color:#D4AF37;font-size:1rem">★★★★★</div>
+        <p class="testimonial-text">The Bhringraj oil reduced my hair fall by almost 70% in just 3 weeks. I've never seen such fast results from a natural product!</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">P</div>
+          <div>
+            <div class="testimonial-name">Priya Sharma</div>
+            <div class="testimonial-loc">Mumbai, Maharashtra</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="stars" style="margin-bottom:10px;color:#D4AF37;font-size:1rem">★★★★★</div>
+        <p class="testimonial-text">The Kumkumadi serum is absolutely magical. My skin has this natural glow that no chemical serum ever gave me. 100% repurchasing!</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">A</div>
+          <div>
+            <div class="testimonial-name">Ananya Patel</div>
+            <div class="testimonial-loc">Ahmedabad, Gujarat</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="stars" style="margin-bottom:10px;color:#D4AF37;font-size:1rem">★★★★★</div>
+        <p class="testimonial-text">I'm so happy I switched to NatHerb. The Ubtan face wash has transformed my skin — no more oiliness and my pores have visibly reduced.</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">R</div>
+          <div>
+            <div class="testimonial-name">Riya Mehta</div>
+            <div class="testimonial-loc">Pune, Maharashtra</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- KEY INGREDIENTS -->
+<section class="section" style="background:var(--bg-light)">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">Nature's Best</div>
+      <h2 class="section-title">Power Ingredients</h2>
+      <p class="section-subtitle">Each ingredient is sourced directly from farms and processed to preserve maximum potency</p>
+    </div>
+    <div class="ingredient-grid">
+      <a href="shop.html?ingredient=saffron" class="ingredient-card">
+        <div class="ingredient-img"><img src="https://images.unsplash.com/photo-1591370874773-6702e8f12fd8?w=200&h=200&fit=crop" alt="Saffron"></div>
+        <div class="ingredient-name">Saffron</div>
+        <div class="ingredient-benefit">Skin brightening</div>
+      </a>
+      <a href="shop.html?ingredient=bhringraj" class="ingredient-card">
+        <div class="ingredient-img"><img src="https://images.unsplash.com/photo-1601049541271-f58c2e03d0d1?w=200&h=200&fit=crop" alt="Bhringraj"></div>
+        <div class="ingredient-name">Bhringraj</div>
+        <div class="ingredient-benefit">Hair growth</div>
+      </a>
+      <a href="shop.html?ingredient=turmeric" class="ingredient-card">
+        <div class="ingredient-img"><img src="https://images.unsplash.com/photo-1615485925600-97237c4fc1ec?w=200&h=200&fit=crop" alt="Turmeric"></div>
+        <div class="ingredient-name">Turmeric</div>
+        <div class="ingredient-benefit">Anti-inflammatory</div>
+      </a>
+      <a href="shop.html?ingredient=rosemary" class="ingredient-card">
+        <div class="ingredient-img"><img src="https://images.unsplash.com/photo-1548354839-e14e95dcda16?w=200&h=200&fit=crop" alt="Rosemary"></div>
+        <div class="ingredient-name">Rosemary</div>
+        <div class="ingredient-benefit">Scalp stimulation</div>
+      </a>
+      <a href="shop.html?ingredient=neem" class="ingredient-card">
+        <div class="ingredient-img"><img src="https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?w=200&h=200&fit=crop" alt="Neem"></div>
+        <div class="ingredient-name">Neem</div>
+        <div class="ingredient-benefit">Anti-bacterial</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- NEWSLETTER / APP PROMO -->
+<section class="section-sm" style="background:linear-gradient(135deg,var(--bg-cream) 0%,#FFE8D0 100%)">
+  <div class="container" style="text-align:center">
+    <div class="section-tag">Stay Updated</div>
+    <h2 class="section-title" style="margin-bottom:8px">Get 10% Off Your First Order</h2>
+    <p style="color:var(--text-light);margin-bottom:28px;max-width:420px;margin-left:auto;margin-right:auto">Subscribe for exclusive deals, Ayurvedic tips, and early access to new launches.</p>
+    <form id="newsletter-form" style="display:flex;gap:12px;max-width:440px;margin:0 auto" onsubmit="subscribeNewsletter(event)">
+      <input type="email" id="newsletter-email" placeholder="Your email address" class="form-control" required style="border-radius:50px;padding-left:20px">
+      <button type="submit" class="btn btn-primary">Subscribe</button>
+    </form>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo-text">Nat<span>Herb</span></div>
+        <p>Bringing the ancient wisdom of Ayurveda to modern beauty routines. 100% natural, zero chemicals, made fresh everyday.</p>
+        <div class="footer-social">
+          <a href="#" class="social-btn"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="social-btn"><i class="fab fa-facebook"></i></a>
+          <a href="#" class="social-btn"><i class="fab fa-youtube"></i></a>
+          <a href="#" class="social-btn"><i class="fab fa-twitter"></i></a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Products</h4>
+        <ul>
+          <li><a href="shop.html?category=hair">Hair Care</a></li>
+          <li><a href="shop.html?category=face">Face Care</a></li>
+          <li><a href="shop.html?category=body">Body Care</a></li>
+          <li><a href="shop.html?tag=new_launch">New Launches</a></li>
+          <li><a href="shop.html?category=trending">Trending</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="about.html">About Us</a></li>
+          <li><a href="ingredients.html">Ingredients</a></li>
+          <li><a href="blog.html">Blog</a></li>
+          <li><a href="careers.html">Careers</a></li>
+          <li><a href="press.html">Press</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Help</h4>
+        <ul>
+          <li><a href="orders.html">Track Order</a></li>
+          <li><a href="support.html">Contact Us</a></li>
+          <li><a href="faq.html">FAQs</a></li>
+          <li><a href="returns.html">Returns Policy</a></li>
+          <li><a href="shipping.html">Shipping Info</a></li>
+        </ul>
+      </div>
+      <div class="footer-newsletter">
+        <h4>Newsletter</h4>
+        <p>Get Ayurvedic tips & exclusive offers</p>
+        <div class="newsletter-form">
+          <input type="email" placeholder="Your email" id="footer-email">
+          <button class="btn btn-primary btn-sm" onclick="subscribeFooter()">Go</button>
+        </div>
+        <div style="margin-top:16px">
+          <div style="font-size:0.8rem;opacity:0.7;margin-bottom:8px">Certifications</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <span class="payment-icon">ISO Certified</span>
+            <span class="payment-icon">AYUSH</span>
+            <span class="payment-icon">Cruelty Free</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2024 NatHerb. All rights reserved.</span>
+      <div style="display:flex;gap:16px;font-size:0.8rem">
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="terms.html">Terms of Service</a>
+      </div>
+      <div class="footer-payments">
+        <span style="font-size:0.8rem;opacity:0.7">We accept:</span>
+        <span class="payment-icon">UPI</span>
+        <span class="payment-icon">Cards</span>
+        <span class="payment-icon">NetBanking</span>
+        <span class="payment-icon">COD</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- SUPPORT WIDGET -->
+<div class="support-widget">
+  <div class="support-panel" id="support-panel">
+    <div class="support-panel-header">
+      <div style="width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:1.2rem">🌿</div>
+      <div>
+        <h3>NatHerb Support</h3>
+        <p>We're here to help you!</p>
+      </div>
+    </div>
+    <div class="support-options">
+      <div class="support-option" onclick="window.location='support.html?type=order'">
+        <i class="fas fa-box"></i>
+        <div><div class="opt-title">Track my Order</div><div class="opt-sub">Get live order updates</div></div>
+      </div>
+      <div class="support-option" onclick="window.location='support.html?type=product'">
+        <i class="fas fa-leaf"></i>
+        <div><div class="opt-title">Product Help</div><div class="opt-sub">Ingredients, usage & more</div></div>
+      </div>
+      <div class="support-option" onclick="window.location='support.html'">
+        <i class="fas fa-ticket-alt"></i>
+        <div><div class="opt-title">Raise a Ticket</div><div class="opt-sub">We respond in 2 hours</div></div>
+      </div>
+      <div class="support-option" onclick="window.open('https://wa.me/919999999999')">
+        <i class="fab fa-whatsapp" style="color:#25D366"></i>
+        <div><div class="opt-title">WhatsApp Us</div><div class="opt-sub">Chat with us directly</div></div>
+      </div>
+    </div>
+  </div>
+  <button class="support-toggle" id="support-toggle" title="Customer Support">
+    <i class="fas fa-headset"></i>
+  </button>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toast-container"></div>
+
+<script src="js/utils.js"></script>
+<script>
+// ── LOAD PRODUCTS ──
+async function loadFeaturedProducts() {
+  try {
+    const res = await apiGet('products', { limit: 8 });
+    const products = res.data || [];
+    const trending = products.filter(p => p.featured);
+    const newOnes = products.filter(p => p.new_launch);
+    const trendingEl = document.getElementById('trending-products');
+    if (trendingEl) {
+      if (trending.length) {
+        trendingEl.innerHTML = trending.map(renderProductCard).join('');
+      } else {
+        trendingEl.innerHTML = products.slice(0,6).map(renderProductCard).join('');
+      }
+    }
+    const newEl = document.getElementById('new-products');
+    if (newEl) {
+      if (newOnes.length) {
+        newEl.innerHTML = newOnes.map(renderProductCard).join('');
+      } else {
+        newEl.innerHTML = products.slice(0,4).map(renderProductCard).join('');
+      }
+    }
+    updateWishlistUI();
+  } catch(e) {
+    console.error(e);
+    document.getElementById('trending-products').innerHTML = '<p style="color:var(--text-light);text-align:center;padding:40px">Failed to load products</p>';
+  }
+}
+
+function copyCode(code) {
+  navigator.clipboard.writeText(code).then(() => showToast(`Code "${code}" copied! 🎉`, 'success'));
+}
+
+function subscribeNewsletter(e) {
+  e.preventDefault();
+  const email = document.getElementById('newsletter-email').value;
+  showToast(`🎉 Welcome! 10% off coupon sent to ${email}`, 'success', 4000);
+  e.target.reset();
+}
+
+function subscribeFooter() {
+  const email = document.getElementById('footer-email').value;
+  if (!email) return;
+  showToast('Subscribed successfully! 🌿', 'success');
+  document.getElementById('footer-email').value = '';
+}
+
+// Init
+loadFeaturedProducts();
+</script>
+</body>
+</html>

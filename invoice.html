@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invoice – NatHerb</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+  <style>
+    @media print {
+      .no-print { display:none!important; }
+      .invoice-wrapper { max-width:100%; box-shadow:none; border:none; }
+      body { background:white; }
+    }
+    .invoice-wrapper { max-width:800px; margin:40px auto; background:white; box-shadow:var(--shadow-lg); border-radius:var(--radius-lg); overflow:hidden; }
+    .invoice-header { background:linear-gradient(135deg,var(--primary-dark) 0%,#6B3A1C 100%); color:white; padding:36px 40px; display:flex; justify-content:space-between; align-items:flex-start; }
+    .invoice-logo { font-family:var(--font-heading); font-size:2rem; font-weight:700; }
+    .invoice-logo span { color:var(--green-light); }
+    .invoice-logo p { font-size:.75rem; opacity:.8; margin-top:4px; }
+    .invoice-meta { text-align:right; }
+    .invoice-meta .inv-number { font-size:1.2rem; font-weight:700; margin-bottom:4px; }
+    .invoice-meta p { font-size:.82rem; opacity:.8; }
+    .invoice-body { padding:36px 40px; }
+    .invoice-parties { display:grid; grid-template-columns:1fr 1fr; gap:30px; margin-bottom:30px; }
+    .invoice-party h4 { font-size:.8rem; text-transform:uppercase; letter-spacing:1px; color:var(--text-light); margin-bottom:8px; }
+    .invoice-party p { font-size:.9rem; line-height:1.7; color:var(--text-medium); }
+    .invoice-party .name { font-weight:700; color:var(--text-dark); font-size:.95rem; }
+    table { width:100%; border-collapse:collapse; margin-bottom:20px; }
+    thead tr { background:var(--bg-cream); }
+    th { padding:12px 14px; text-align:left; font-size:.8rem; text-transform:uppercase; letter-spacing:.5px; color:var(--text-light); font-weight:600; }
+    td { padding:12px 14px; border-bottom:1px solid var(--border-light); font-size:.9rem; vertical-align:middle; }
+    tbody tr:last-child td { border-bottom:none; }
+    .total-section { margin-left:auto; max-width:280px; }
+    .total-row { display:flex; justify-content:space-between; padding:6px 0; font-size:.9rem; }
+    .total-row.grand { font-size:1.05rem; font-weight:700; border-top:2px solid var(--border); padding-top:10px; margin-top:4px; color:var(--primary); }
+    .invoice-footer { background:var(--bg-cream); padding:20px 40px; display:flex; justify-content:space-between; align-items:center; font-size:.8rem; color:var(--text-light); border-top:1px solid var(--border-light); }
+    .invoice-stamp { width:80px;height:80px;border-radius:50%;border:3px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:var(--green);text-align:center;line-height:1.3;transform:rotate(-15deg); }
+    @media(max-width:600px){.invoice-header{flex-direction:column;gap:16px}.invoice-meta{text-align:left}.invoice-parties{grid-template-columns:1fr}.invoice-body,.invoice-header{padding:24px}}
+  </style>
+</head>
+<body style="background:var(--bg-cream)">
+
+<!-- Print Controls -->
+<div class="no-print" style="background:var(--text-dark);padding:14px 24px;display:flex;align-items:center;justify-content:space-between">
+  <a href="orders.html" style="color:white;display:flex;align-items:center;gap:8px;font-size:.9rem"><i class="fas fa-arrow-left"></i> Back to Orders</a>
+  <div style="display:flex;gap:10px">
+    <button onclick="window.print()" class="btn btn-primary btn-sm"><i class="fas fa-print"></i> Print Invoice</button>
+    <button onclick="downloadPDF()" class="btn btn-outline-dark btn-sm" style="border-color:rgba(255,255,255,.3);color:white"><i class="fas fa-download"></i> Download PDF</button>
+  </div>
+</div>
+
+<!-- Loading -->
+<div id="invoice-loading" style="text-align:center;padding:80px">
+  <div class="loading-spinner"></div>
+  <p style="color:var(--text-light);margin-top:16px">Generating invoice...</p>
+</div>
+
+<!-- Invoice -->
+<div class="invoice-wrapper" id="invoice-content" style="display:none">
+  <!-- Header -->
+  <div class="invoice-header">
+    <div>
+      <div class="invoice-logo">Nat<span>Herb</span></div>
+      <p style="font-size:.78rem;opacity:.8;margin-top:6px;max-width:240px">Fresh Ayurvedic Beauty & Wellness<br>Plot 12, Wellness Park, Gurugram, Haryana 122001<br>GSTIN: 06AABCN1234F1ZP | support@natherb.com</p>
+    </div>
+    <div class="invoice-meta">
+      <div class="inv-number">TAX INVOICE</div>
+      <div id="inv-number" style="font-size:1rem;font-weight:600;opacity:.9"></div>
+      <p id="inv-date"></p>
+      <p id="inv-payment-status" style="margin-top:8px;font-size:.85rem;background:rgba(255,255,255,.15);padding:3px 10px;border-radius:20px;display:inline-block"></p>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="invoice-body">
+    <div class="invoice-parties">
+      <div class="invoice-party">
+        <h4>Bill To</h4>
+        <p id="inv-customer-name" class="name"></p>
+        <p id="inv-customer-details"></p>
+      </div>
+      <div class="invoice-party" style="text-align:right">
+        <h4>Ship To</h4>
+        <p id="inv-ship-to"></p>
+      </div>
+    </div>
+
+    <!-- Items Table -->
+    <table id="inv-items-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Product</th>
+          <th>Unit Price</th>
+          <th style="text-align:center">Qty</th>
+          <th>Tax (18%)</th>
+          <th style="text-align:right">Total</th>
+        </tr>
+      </thead>
+      <tbody id="inv-items-body">
+        <!-- Items rendered -->
+      </tbody>
+    </table>
+
+    <!-- Totals -->
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:20px">
+      <div id="inv-stamp">
+        <div class="invoice-stamp">PAID</div>
+      </div>
+      <div class="total-section">
+        <div class="total-row"><span>Subtotal</span><span id="inv-subtotal">₹0</span></div>
+        <div class="total-row" style="color:var(--green)"><span>Discount</span><span id="inv-discount">₹0</span></div>
+        <div class="total-row"><span>Shipping</span><span id="inv-shipping">₹0</span></div>
+        <div class="total-row"><span>GST (18%)</span><span id="inv-gst">₹0</span></div>
+        <div class="total-row grand"><span>Total Amount</span><span id="inv-total">₹0</span></div>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div style="margin-top:24px;padding:16px;background:var(--bg-cream);border-radius:var(--radius-sm);border-left:3px solid var(--primary)">
+      <p style="font-size:.82rem;color:var(--text-medium)"><strong>Terms & Conditions:</strong> This is an electronically generated invoice. All disputes subject to Haryana jurisdiction. Returns accepted within 7 days of delivery. For queries, contact support@natherb.com or call 1800-XXX-XXXX.</p>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="invoice-footer">
+    <div>
+      <p style="font-weight:600;color:var(--text-dark);margin-bottom:4px">Thank you for shopping with NatHerb! 🌿</p>
+      <p>Fresh Ayurvedic beauty — zero chemicals, made daily.</p>
+    </div>
+    <div style="display:flex;gap:12px">
+      <span class="payment-icon" style="background:rgba(44,24,16,.08);color:var(--text-medium)">UPI</span>
+      <span class="payment-icon" style="background:rgba(44,24,16,.08);color:var(--text-medium)">Cards</span>
+      <span class="payment-icon" style="background:rgba(44,24,16,.08);color:var(--text-medium)">COD</span>
+    </div>
+  </div>
+</div>
+
+<div style="height:40px"></div>
+<div class="toast-container" id="toast-container"></div>
+
+<script src="js/utils.js"></script>
+<script>
+async function loadInvoice() {
+  const params = new URLSearchParams(window.location.search);
+  const orderId = params.get('id');
+  const orderNum = params.get('order');
+  try {
+    let order = null;
+    if (orderId) {
+      order = await fetch(`tables/orders/${orderId}`).then(r => r.json());
+    } else if (orderNum) {
+      const res = await apiGet('orders', { search: orderNum, limit: 5 });
+      order = res.data?.find(o => o.order_number === orderNum) || res.data?.[0];
+    }
+    if (!order) { document.getElementById('invoice-loading').innerHTML = '<p style="color:var(--red);font-size:1rem">Invoice not found.</p>'; return; }
+    document.getElementById('invoice-loading').style.display = 'none';
+    document.getElementById('invoice-content').style.display = 'block';
+    document.title = 'Invoice #' + order.order_number + ' – NatHerb';
+
+    // Header
+    document.getElementById('inv-number').textContent = '#' + order.order_number;
+    document.getElementById('inv-date').textContent = 'Date: ' + (order.created_at ? formatDate(order.created_at) : new Date().toLocaleDateString('en-IN'));
+    const pStatus = order.payment_status || 'paid';
+    document.getElementById('inv-payment-status').textContent = '✓ ' + pStatus.toUpperCase();
+    document.getElementById('inv-payment-status').style.color = pStatus === 'paid' ? '#7FDF7F' : '#FFB347';
+    if (pStatus !== 'paid') { document.getElementById('inv-stamp').innerHTML = '<div class="invoice-stamp" style="border-color:var(--red);color:var(--red)">PENDING</div>'; }
+
+    // Customer
+    document.getElementById('inv-customer-name').textContent = order.user_name || '';
+    document.getElementById('inv-customer-details').innerHTML = (order.user_email||'') + '<br>' + (order.user_phone||'');
+
+    let addr = {};
+    try { addr = typeof order.shipping_address === 'string' ? JSON.parse(order.shipping_address) : (order.shipping_address || {}); } catch {}
+    document.getElementById('inv-ship-to').innerHTML = (order.user_name||'') + '<br>' + (addr.addr1||'') + (addr.addr2?', '+addr.addr2:'') + '<br>' + (addr.city||'') + (addr.state?', '+addr.state:'') + (addr.pincode?' – '+addr.pincode:'') + '<br>India';
+
+    // Items
+    let items = [];
+    try { items = typeof order.items === 'string' ? JSON.parse(order.items) : (order.items || []); } catch {}
+    const subtotal = order.subtotal || 0;
+    const gstRate = 0.18;
+    document.getElementById('inv-items-body').innerHTML = items.map((item, idx) => {
+      const taxableAmt = item.price / (1 + gstRate);
+      const tax = item.price - taxableAmt;
+      return `
+        <tr>
+          <td>${idx+1}</td>
+          <td>
+            <div style="font-weight:600">${item.name}</div>
+            <div style="font-size:.75rem;color:var(--text-light)">Natural Ayurvedic Product</div>
+          </td>
+          <td>${formatPrice(taxableAmt.toFixed(0))}</td>
+          <td style="text-align:center">${item.qty}</td>
+          <td style="color:var(--text-light)">${formatPrice((tax*item.qty).toFixed(0))}</td>
+          <td style="text-align:right;font-weight:600">${formatPrice(item.price*item.qty)}</td>
+        </tr>`;
+    }).join('');
+
+    // Totals
+    const disc = order.discount || 0;
+    const ship = order.shipping || 0;
+    const total = order.total || 0;
+    const gstTotal = Math.round(subtotal * gstRate / (1 + gstRate));
+    document.getElementById('inv-subtotal').textContent = formatPrice(subtotal);
+    document.getElementById('inv-discount').textContent = disc > 0 ? '-' + formatPrice(disc) : '₹0';
+    document.getElementById('inv-shipping').textContent = ship === 0 ? 'FREE' : formatPrice(ship);
+    document.getElementById('inv-gst').textContent = 'Incl. ' + formatPrice(gstTotal);
+    document.getElementById('inv-total').textContent = formatPrice(total);
+  } catch(e) {
+    document.getElementById('invoice-loading').innerHTML = '<p style="color:var(--red);font-size:1rem;text-align:center;padding:40px">Error generating invoice. Please try again.</p>';
+  }
+}
+
+function downloadPDF() {
+  showToast('Preparing PDF download...','info');
+  setTimeout(() => { window.print(); }, 300);
+}
+
+loadInvoice();
+</script>
+</body>
+</html>

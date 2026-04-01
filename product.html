@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product – NatHerb</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+  <style>
+    .pdp-layout { display:grid; grid-template-columns:1fr 1fr; gap:50px; padding:40px 0; }
+    .pdp-images { position:sticky; top:100px; }
+    .pdp-main-img { border-radius:var(--radius-lg); overflow:hidden; margin-bottom:12px; background:var(--bg-cream); aspect-ratio:1; }
+    .pdp-main-img img { width:100%; height:100%; object-fit:cover; transition:transform .3s; }
+    .pdp-main-img:hover img { transform:scale(1.05); }
+    .pdp-thumbs { display:flex; gap:10px; }
+    .pdp-thumb {
+      width:72px;height:72px; border-radius:var(--radius-sm); overflow:hidden;
+      border:2px solid var(--border-light); cursor:pointer; transition:var(--transition); flex-shrink:0;
+    }
+    .pdp-thumb.active { border-color:var(--primary); }
+    .pdp-thumb img { width:100%;height:100%;object-fit:cover; }
+    .pdp-info { padding:10px 0; }
+    .pdp-badges { display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
+    .pdp-title { font-family:var(--font-heading); font-size:1.85rem; line-height:1.3; margin-bottom:8px; }
+    .pdp-short { font-size:0.95rem; color:var(--text-light); margin-bottom:16px; line-height:1.6; }
+    .pdp-rating-row { display:flex; align-items:center; gap:12px; margin-bottom:20px; }
+    .pdp-rating-big { font-size:1.2rem; font-weight:700; }
+    .pdp-price-row { display:flex; align-items:center; gap:14px; margin-bottom:20px; }
+    .pdp-price { font-size:2rem; font-weight:700; color:var(--text-dark); }
+    .pdp-original { font-size:1.2rem; color:var(--text-light); text-decoration:line-through; }
+    .pdp-discount { background:rgba(90,138,90,.1); color:var(--green); font-size:0.9rem; font-weight:700; padding:4px 12px; border-radius:var(--radius-full); }
+    .pdp-size-opts { display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap; }
+    .size-opt {
+      padding:8px 18px; border-radius:var(--radius-sm); border:1.5px solid var(--border);
+      cursor:pointer; font-size:0.88rem; font-weight:500; transition:var(--transition);
+    }
+    .size-opt.selected { border-color:var(--primary); background:rgba(193,124,60,.08); color:var(--primary); }
+    .pdp-qty-row { display:flex; align-items:center; gap:16px; margin-bottom:20px; }
+    .pdp-actions { display:flex; flex-direction:column; gap:12px; margin-bottom:24px; }
+    .pdp-actions .btn { padding:15px 28px; font-size:1rem; }
+    .pdp-assurance { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:24px; }
+    .assurance-item { text-align:center; padding:14px 8px; background:var(--bg-cream); border-radius:var(--radius-sm); }
+    .assurance-item i { font-size:1.4rem; color:var(--primary); margin-bottom:6px; display:block; }
+    .assurance-item span { font-size:0.75rem; color:var(--text-medium); font-weight:500; }
+    .pdp-pincode { display:flex; gap:8px; margin-bottom:20px; align-items:center; }
+    .pdp-pincode input { width:140px; }
+    /* Tabs */
+    .pdp-tabs { margin-top:20px; }
+    /* Reviews */
+    .review-item { padding:20px 0; border-bottom:1px solid var(--border-light); }
+    .review-item:last-child { border-bottom:none; }
+    .review-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:8px; }
+    .review-author { font-weight:600; font-size:0.92rem; }
+    .review-date { font-size:0.78rem; color:var(--text-light); }
+    .review-title { font-weight:600; margin-bottom:4px; }
+    .review-body { font-size:0.9rem; color:var(--text-medium); line-height:1.6; }
+    .verified-badge { font-size:0.75rem; color:var(--green); font-weight:500; }
+    /* Related */
+    @media(max-width:900px) {
+      .pdp-layout { grid-template-columns:1fr; gap:24px; }
+      .pdp-images { position:static; }
+      .pdp-title { font-size:1.5rem; }
+      .pdp-assurance { grid-template-columns:repeat(3,1fr); }
+    }
+  </style>
+</head>
+<body>
+<!-- ANNOUNCEMENT BAR -->
+<div class="announcement-bar">
+  <i class="fas fa-gift"></i>
+  <span>Extra <strong>Rs.250 OFF</strong> | Code: <span class="coupon-code" onclick="navigator.clipboard.writeText('NEWHABIT250');showToast('Copied!','success')">NEWHABIT250</span></span>
+</div>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="logo">
+      <div><div class="logo-text">Nat<span>Herb</span></div><div class="logo-tagline">Fresh Ayurveda</div></div>
+    </a>
+    <nav class="main-nav">
+      <ul class="nav-list">
+        <li class="nav-item"><a href="shop.html?category=trending" class="nav-link">🔥 Trending</a></li>
+        <li class="nav-item"><a href="shop.html?category=hair" class="nav-link">Hair</a></li>
+        <li class="nav-item"><a href="shop.html?category=face" class="nav-link">Face</a></li>
+        <li class="nav-item"><a href="shop.html?category=body" class="nav-link">Body</a></li>
+        <li class="nav-item"><a href="shop.html" class="nav-link">All Products</a></li>
+      </ul>
+    </nav>
+    <div class="header-actions">
+      <button class="header-action-btn" id="search-btn"><i class="fas fa-search"></i></button>
+      <a href="wishlist.html" class="header-action-btn"><i class="far fa-heart"></i><span class="wishlist-count">0</span></a>
+      <a href="account.html" class="header-action-btn"><i class="far fa-user"></i></a>
+      <button class="header-action-btn" id="cart-btn"><i class="fas fa-shopping-bag"></i><span class="cart-count">0</span></button>
+      <div class="header-hamburger" id="hamburger-btn" style="display:none"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+</header>
+
+<div id="mobile-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9998;display:none"></div>
+<div class="mobile-menu" id="mobile-menu">
+  <span class="mobile-nav-close" id="mobile-menu-close">✕</span>
+  <a href="shop.html" class="mobile-nav-link">All Products</a>
+  <a href="shop.html?category=hair" class="mobile-nav-link">Hair</a>
+  <a href="shop.html?category=face" class="mobile-nav-link">Face</a>
+  <a href="account.html" class="mobile-nav-link">Account</a>
+</div>
+<div class="search-overlay" id="search-overlay">
+  <div class="search-box">
+    <div class="search-input-wrap"><i class="fas fa-search" style="color:var(--text-light)"></i><input type="text" id="search-input" placeholder="Search products..."><button id="search-close-btn" style="color:var(--text-light)">✕</button></div>
+    <div id="search-results"></div>
+  </div>
+</div>
+<div class="cart-overlay" id="cart-overlay"></div>
+<aside class="cart-sidebar" id="cart-sidebar">
+  <div class="cart-header"><h2><i class="fas fa-shopping-bag" style="color:var(--primary);margin-right:8px"></i>Your Cart</h2><button class="cart-close-btn" id="cart-close-btn"><i class="fas fa-times"></i></button></div>
+  <div class="cart-items" id="cart-items-list"></div>
+  <div class="cart-empty" id="cart-empty" style="display:none"><i class="fas fa-shopping-bag"></i><p>Your cart is empty</p><a href="shop.html" class="btn btn-primary btn-sm" onclick="closeCart()">Shop Now</a></div>
+  <div class="cart-footer">
+    <div id="coupon-applied-badge" class="coupon-applied" style="display:none"><span class="coupon-text"></span><span class="coupon-remove" id="remove-coupon-btn">✕</span></div>
+    <div class="cart-coupon"><input type="text" id="coupon-input" placeholder="Coupon code" style="text-transform:uppercase"><button class="btn btn-outline-dark btn-sm" id="apply-coupon-btn">Apply</button></div>
+    <div class="cart-summary-row"><span>Subtotal</span><span class="cart-subtotal">₹0</span></div>
+    <div class="cart-summary-row" style="color:var(--green)"><span>Discount</span><span class="cart-discount">₹0</span></div>
+    <div class="cart-summary-row"><span>Shipping</span><span class="cart-shipping">₹99</span></div>
+    <div class="cart-summary-row total"><span>Total</span><span class="cart-total">₹0</span></div>
+    <a href="checkout.html" class="btn btn-primary btn-block" style="margin-top:14px" onclick="closeCart()"><i class="fas fa-lock"></i> Checkout</a>
+  </div>
+</aside>
+
+<!-- PRODUCT DETAIL AREA -->
+<div class="container">
+  <div class="breadcrumb">
+    <a href="index.html">Home</a><span class="sep">/</span>
+    <a href="shop.html" id="bc-category">Shop</a><span class="sep">/</span>
+    <span class="current" id="bc-name">Loading...</span>
+  </div>
+
+  <!-- Loading state -->
+  <div id="pdp-loading" style="display:flex;gap:40px;padding:40px 0">
+    <div class="skeleton" style="width:50%;aspect-ratio:1;border-radius:12px;flex-shrink:0"></div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:16px">
+      <div class="skeleton" style="height:24px;width:60%;border-radius:6px"></div>
+      <div class="skeleton" style="height:40px;width:90%;border-radius:6px"></div>
+      <div class="skeleton" style="height:20px;width:100%;border-radius:6px"></div>
+      <div class="skeleton" style="height:20px;width:80%;border-radius:6px"></div>
+      <div class="skeleton" style="height:50px;width:40%;border-radius:6px"></div>
+      <div class="skeleton" style="height:54px;border-radius:50px"></div>
+    </div>
+  </div>
+
+  <div class="pdp-layout" id="pdp-content" style="display:none">
+    <!-- IMAGES -->
+    <div class="pdp-images">
+      <div class="pdp-main-img">
+        <img id="main-product-img" src="" alt="" onerror="this.src='https://placehold.co/600x600/fdf5eb/c17c3c?text=NH'">
+      </div>
+      <div class="pdp-thumbs" id="pdp-thumbs"></div>
+    </div>
+
+    <!-- INFO -->
+    <div class="pdp-info">
+      <div class="pdp-badges" id="pdp-badges"></div>
+      <h1 class="pdp-title" id="pdp-title"></h1>
+      <p class="pdp-short" id="pdp-short"></p>
+      <div class="pdp-rating-row">
+        <span class="pdp-rating-big" id="pdp-rating-num"></span>
+        <div id="pdp-stars"></div>
+        <a href="#reviews" style="font-size:.88rem;color:var(--primary)" id="pdp-review-count"></a>
+      </div>
+      <div class="pdp-price-row">
+        <span class="pdp-price" id="pdp-price"></span>
+        <span class="pdp-original" id="pdp-original"></span>
+        <span class="pdp-discount" id="pdp-discount"></span>
+      </div>
+      <p style="font-size:.82rem;color:var(--green);margin-bottom:16px">
+        <i class="fas fa-check-circle"></i> In Stock &nbsp; | &nbsp;
+        <i class="fas fa-truck"></i> Free shipping on orders above ₹599
+      </p>
+
+      <!-- Quantity -->
+      <div class="pdp-qty-row">
+        <span style="font-size:.9rem;font-weight:600;color:var(--text-medium)">Qty:</span>
+        <div class="qty-control" style="border:2px solid var(--border)">
+          <button class="qty-btn" onclick="changeQty(-1)">−</button>
+          <span class="qty-value" id="qty-display">1</span>
+          <button class="qty-btn" onclick="changeQty(1)">+</button>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="pdp-actions">
+        <button class="btn btn-primary btn-lg" id="add-to-cart-btn" onclick="addCurrentToCart()">
+          <i class="fas fa-shopping-bag"></i> Add to Cart
+        </button>
+        <button class="btn btn-outline-dark btn-lg" id="buy-now-btn" onclick="buyNow()">
+          <i class="fas fa-bolt"></i> Buy Now
+        </button>
+        <button class="btn" id="wishlist-btn" style="border:1.5px solid var(--border);color:var(--text-medium)" onclick="toggleCurrentWishlist()">
+          <i class="far fa-heart"></i> <span id="wishlist-text">Add to Wishlist</span>
+        </button>
+      </div>
+
+      <!-- Assurance -->
+      <div class="pdp-assurance">
+        <div class="assurance-item"><i class="fas fa-leaf"></i><span>100% Natural</span></div>
+        <div class="assurance-item"><i class="fas fa-undo"></i><span>7-Day Returns</span></div>
+        <div class="assurance-item"><i class="fas fa-shield-alt"></i><span>Secure Payment</span></div>
+      </div>
+
+      <!-- Pincode check -->
+      <div class="pdp-pincode">
+        <i class="fas fa-map-marker-alt" style="color:var(--primary)"></i>
+        <input type="text" class="form-control" placeholder="Enter PIN code" id="pincode-input" maxlength="6" style="width:140px;padding:8px 12px">
+        <button class="btn btn-outline-dark btn-sm" onclick="checkPincode()">Check</button>
+        <span id="pincode-result" style="font-size:.82rem;color:var(--green)"></span>
+      </div>
+
+      <!-- Product Tabs -->
+      <div class="pdp-tabs">
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchTab(this,'tab-desc')">Description</button>
+          <button class="tab-btn" onclick="switchTab(this,'tab-ingredients')">Ingredients</button>
+          <button class="tab-btn" onclick="switchTab(this,'tab-howto')">How to Use</button>
+          <button class="tab-btn" onclick="switchTab(this,'tab-benefits')">Benefits</button>
+        </div>
+        <div id="tab-desc" class="tab-panel active" id="pdp-description" style="line-height:1.8;color:var(--text-medium)"></div>
+        <div id="tab-ingredients" class="tab-panel">
+          <p style="color:var(--text-medium);line-height:1.8" id="tab-ingredients-content"></p>
+        </div>
+        <div id="tab-howto" class="tab-panel">
+          <p style="color:var(--text-medium);line-height:1.8" id="tab-howto-content"></p>
+        </div>
+        <div id="tab-benefits" class="tab-panel">
+          <p style="color:var(--text-medium);line-height:1.8" id="tab-benefits-content"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REVIEWS SECTION -->
+  <div id="reviews" style="padding:40px 0;border-top:1px solid var(--border-light)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px">
+      <h2 style="font-family:var(--font-heading);font-size:1.6rem">Customer Reviews</h2>
+      <button class="btn btn-outline-dark btn-sm" onclick="showReviewForm()">Write a Review</button>
+    </div>
+    <!-- Rating summary -->
+    <div style="display:flex;gap:40px;align-items:center;background:var(--bg-cream);padding:24px;border-radius:var(--radius);margin-bottom:28px">
+      <div style="text-align:center">
+        <div style="font-size:3.5rem;font-weight:700;font-family:var(--font-heading);color:var(--primary)" id="avg-rating">4.8</div>
+        <div id="avg-stars" style="color:#D4AF37;font-size:1.3rem">★★★★★</div>
+        <div style="font-size:.82rem;color:var(--text-light)" id="total-reviews">0 reviews</div>
+      </div>
+      <div style="flex:1" id="rating-bars"></div>
+    </div>
+    <div id="reviews-list">
+      <div class="loading-spinner"></div>
+    </div>
+  </div>
+
+  <!-- RELATED PRODUCTS -->
+  <div style="padding:40px 0;border-top:1px solid var(--border-light)">
+    <h2 style="font-family:var(--font-heading);font-size:1.6rem;margin-bottom:24px">You May Also Like</h2>
+    <div class="products-row" id="related-products"></div>
+  </div>
+</div>
+
+<!-- Review Form Modal -->
+<div class="modal-backdrop" id="review-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title">Write a Review</h2>
+      <button class="modal-close" onclick="closeReviewModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Your Rating *</label>
+        <div class="star-rating" id="star-input">
+          <i class="far fa-star" data-val="1" onclick="setRating(1)"></i>
+          <i class="far fa-star" data-val="2" onclick="setRating(2)"></i>
+          <i class="far fa-star" data-val="3" onclick="setRating(3)"></i>
+          <i class="far fa-star" data-val="4" onclick="setRating(4)"></i>
+          <i class="far fa-star" data-val="5" onclick="setRating(5)"></i>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Your Name *</label>
+        <input type="text" class="form-control" id="rev-name" placeholder="Enter your name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Review Title</label>
+        <input type="text" class="form-control" id="rev-title" placeholder="Summarize your experience">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Your Review *</label>
+        <textarea class="form-control" id="rev-body" placeholder="Tell us about your experience with this product..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary btn-block" onclick="submitReview()">Submit Review</button>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-bottom" style="border-top:1px solid rgba(255,255,255,.1);padding:20px 0">
+      <span>© 2024 NatHerb. All rights reserved.</span>
+      <div style="display:flex;gap:16px;font-size:0.8rem"><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a></div>
+      <div class="footer-payments"><span class="payment-icon">UPI</span><span class="payment-icon">Cards</span><span class="payment-icon">COD</span></div>
+    </div>
+  </div>
+</footer>
+
+<div class="support-widget">
+  <div class="support-panel" id="support-panel"><div class="support-panel-header"><div style="width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center">🌿</div><div><h3>NatHerb Support</h3><p>We're here to help!</p></div></div><div class="support-options"><div class="support-option" onclick="window.location='support.html'"><i class="fas fa-headset"></i><div><div class="opt-title">Get Help</div></div></div></div></div>
+  <button class="support-toggle" id="support-toggle"><i class="fas fa-headset"></i></button>
+</div>
+<div class="toast-container" id="toast-container"></div>
+
+<script src="js/utils.js"></script>
+<script>
+let currentProduct = null;
+let currentQty = 1;
+let selectedRating = 0;
+
+async function loadProduct() {
+  const slug = new URLSearchParams(window.location.search).get('slug');
+  if (!slug) { window.location.href = 'shop.html'; return; }
+  try {
+    const res = await apiGet('products', { search: slug, limit: 20 });
+    const product = res.data?.find(p => p.slug === slug) || res.data?.[0];
+    if (!product) { document.getElementById('pdp-loading').innerHTML = '<p style="color:var(--text-light);padding:60px;text-align:center">Product not found.</p>'; return; }
+    currentProduct = product;
+    renderProduct(product);
+    loadReviews(product.id || product.slug);
+    loadRelated(product.category, product.id);
+  } catch(e) {
+    document.getElementById('pdp-loading').innerHTML = '<p style="color:var(--text-light);padding:60px;text-align:center">Error loading product.</p>';
+  }
+}
+
+function renderProduct(p) {
+  document.title = p.name + ' – NatHerb';
+  document.getElementById('pdp-loading').style.display = 'none';
+  document.getElementById('pdp-content').style.display = 'grid';
+  document.getElementById('bc-name').textContent = p.name;
+  document.getElementById('bc-category').textContent = p.category ? p.category.charAt(0).toUpperCase()+p.category.slice(1) : 'Shop';
+  document.getElementById('bc-category').href = `shop.html?category=${p.category}`;
+  document.getElementById('main-product-img').src = p.image;
+  document.getElementById('main-product-img').alt = p.name;
+  document.getElementById('pdp-title').textContent = p.name;
+  document.getElementById('pdp-short').textContent = p.short_desc || '';
+  document.getElementById('pdp-rating-num').textContent = p.rating || 4.5;
+  document.getElementById('pdp-stars').innerHTML = starHTML(p.rating || 4.5);
+  document.getElementById('pdp-review-count').textContent = `(${(p.reviews_count || 0).toLocaleString()} reviews)`;
+  document.getElementById('pdp-price').textContent = formatPrice(p.price);
+  if (p.original_price > p.price) {
+    document.getElementById('pdp-original').textContent = formatPrice(p.original_price);
+    const disc = getDiscount(p.original_price, p.price);
+    if (disc) document.getElementById('pdp-discount').textContent = disc + '% OFF';
+  }
+  // Badges
+  const badgeMap = {'BEST SELLER':'','NEW LAUNCH':'new','AWARD WINNER':'award','FEATURED':'featured'};
+  if (p.badge) document.getElementById('pdp-badges').innerHTML = `<span class="product-badge ${badgeMap[p.badge]||''}">${p.badge}</span>`;
+  if (p.new_launch && p.badge !== 'NEW LAUNCH') document.getElementById('pdp-badges').innerHTML += '<span class="product-badge new">NEW LAUNCH</span>';
+  // Thumbs
+  document.getElementById('pdp-thumbs').innerHTML = `<div class="pdp-thumb active" onclick="switchImg(this,'${p.image}')"><img src="${p.image}" alt="${p.name}" onerror="this.src='https://placehold.co/72/fdf5eb/c17c3c?text=NH'"></div>`;
+  // Tabs
+  document.getElementById('tab-desc').innerHTML = p.description || '<p>'+p.short_desc+'</p>';
+  document.getElementById('tab-ingredients-content').textContent = p.ingredients || 'Premium natural ingredients.';
+  document.getElementById('tab-howto-content').textContent = p.how_to_use || 'Apply as directed.';
+  document.getElementById('tab-benefits-content').textContent = p.benefits || 'Natural beauty benefits.';
+  // Wishlist state
+  updateWishlistBtn();
+}
+
+function switchImg(thumb, src) {
+  document.querySelectorAll('.pdp-thumb').forEach(t => t.classList.remove('active'));
+  thumb.classList.add('active');
+  document.getElementById('main-product-img').src = src;
+}
+
+function changeQty(delta) {
+  currentQty = Math.max(1, currentQty + delta);
+  document.getElementById('qty-display').textContent = currentQty;
+}
+
+function addCurrentToCart() {
+  if (!currentProduct) return;
+  Cart.add(currentProduct, currentQty);
+  openCart();
+}
+
+function buyNow() {
+  if (!currentProduct) return;
+  Cart.add(currentProduct, currentQty);
+  window.location.href = 'checkout.html';
+}
+
+function updateWishlistBtn() {
+  if (!currentProduct) return;
+  const inWish = Wishlist.has(currentProduct.id);
+  const btn = document.getElementById('wishlist-btn');
+  const icon = btn?.querySelector('i');
+  if (icon) icon.className = inWish ? 'fas fa-heart' : 'far fa-heart';
+  if (icon) icon.style.color = inWish ? 'var(--red)' : '';
+  document.getElementById('wishlist-text').textContent = inWish ? 'Remove from Wishlist' : 'Add to Wishlist';
+}
+
+function toggleCurrentWishlist() {
+  if (!currentProduct) return;
+  Wishlist.toggle(currentProduct);
+  updateWishlistBtn();
+}
+
+function checkPincode() {
+  const pin = document.getElementById('pincode-input').value;
+  if (pin.length !== 6) { showToast('Enter a valid 6-digit PIN code', 'error'); return; }
+  const el = document.getElementById('pincode-result');
+  el.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking...';
+  setTimeout(() => {
+    const deliverable = Math.random() > 0.2;
+    el.innerHTML = deliverable
+      ? '<span style="color:var(--green)"><i class="fas fa-check-circle"></i> Delivery available in 3-5 days</span>'
+      : '<span style="color:var(--red)"><i class="fas fa-times-circle"></i> Not serviceable yet</span>';
+  }, 1200);
+}
+
+async function loadReviews(productId) {
+  try {
+    const res = await apiGet('reviews', { search: productId, limit: 20 });
+    const reviews = res.data || [];
+    const avgRating = reviews.length ? reviews.reduce((s,r) => s + (r.rating||5), 0) / reviews.length : 4.8;
+    document.getElementById('avg-rating').textContent = avgRating.toFixed(1);
+    document.getElementById('avg-stars').innerHTML = starHTML(avgRating);
+    document.getElementById('total-reviews').textContent = `${reviews.length} review${reviews.length !== 1 ? 's' : ''}`;
+    // Rating bars
+    const bars = [5,4,3,2,1].map(n => {
+      const count = reviews.filter(r => Math.round(r.rating) === n).length;
+      const pct = reviews.length ? (count/reviews.length*100).toFixed(0) : 0;
+      return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <span style="font-size:.8rem;width:12px">${n}</span>
+        <i class="fas fa-star" style="color:#D4AF37;font-size:.75rem"></i>
+        <div style="flex:1;height:8px;background:var(--border-light);border-radius:4px;overflow:hidden">
+          <div style="width:${pct}%;height:100%;background:var(--gold);border-radius:4px"></div>
+        </div>
+        <span style="font-size:.78rem;color:var(--text-light);width:28px">${count}</span>
+      </div>`;
+    }).join('');
+    document.getElementById('rating-bars').innerHTML = bars;
+    if (!reviews.length) {
+      document.getElementById('reviews-list').innerHTML = '<p style="color:var(--text-light);text-align:center;padding:30px">No reviews yet. Be the first to review!</p>';
+      return;
+    }
+    document.getElementById('reviews-list').innerHTML = reviews.map(r => `
+      <div class="review-item">
+        <div class="review-header">
+          <div>
+            <div class="review-author">${r.user_name} ${r.verified ? '<span class="verified-badge"><i class="fas fa-check-circle"></i> Verified Purchase</span>' : ''}</div>
+            <div>${starHTML(r.rating || 5)}</div>
+          </div>
+          <div class="review-date">${r.created_at ? formatDate(r.created_at) : ''}</div>
+        </div>
+        ${r.title ? `<div class="review-title">${r.title}</div>` : ''}
+        <div class="review-body">${r.body || ''}</div>
+        <div style="margin-top:8px;font-size:.78rem;color:var(--text-light)">
+          <button onclick="this.innerHTML='Helpful ('+((parseInt(this.dataset.n)||0)+1)+')'" data-n="${r.helpful_count||0}" style="background:none;border:1px solid var(--border);padding:3px 10px;border-radius:20px;cursor:pointer;font-size:.78rem">
+            👍 Helpful (${r.helpful_count||0})
+          </button>
+        </div>
+      </div>`).join('');
+  } catch { document.getElementById('reviews-list').innerHTML = '<p style="color:var(--text-light);text-align:center;padding:20px">Could not load reviews.</p>'; }
+}
+
+async function loadRelated(category, excludeId) {
+  try {
+    const res = await apiGet('products', { limit: 10 });
+    const related = (res.data || []).filter(p => p.category === category && p.id !== excludeId).slice(0, 6);
+    document.getElementById('related-products').innerHTML = related.map(renderProductCard).join('');
+    updateWishlistUI();
+  } catch {}
+}
+
+function switchTab(btn, tabId) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(tabId)?.classList.add('active');
+}
+
+function showReviewForm() { document.getElementById('review-modal').classList.add('open'); }
+function closeReviewModal() { document.getElementById('review-modal').classList.remove('open'); }
+function setRating(n) {
+  selectedRating = n;
+  document.querySelectorAll('#star-input i').forEach((s,i) => {
+    s.className = i < n ? 'fas fa-star' : 'far fa-star';
+    s.style.color = i < n ? '#D4AF37' : '';
+  });
+}
+
+async function submitReview() {
+  const name = document.getElementById('rev-name').value.trim();
+  const body = document.getElementById('rev-body').value.trim();
+  if (!name || !body || !selectedRating) { showToast('Please fill all fields and select a rating', 'error'); return; }
+  try {
+    await apiPost('reviews', {
+      product_id: currentProduct?.slug || '',
+      user_name: name,
+      rating: selectedRating,
+      title: document.getElementById('rev-title').value.trim(),
+      body, verified: false, helpful_count: 0
+    });
+    closeReviewModal();
+    showToast('Review submitted! Thank you 🌿', 'success');
+    loadReviews(currentProduct?.id || currentProduct?.slug);
+  } catch { showToast('Error submitting review', 'error'); }
+}
+
+loadProduct();
+</script>
+</body>
+</html>

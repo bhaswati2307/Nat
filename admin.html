@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard – NatHerb</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root { --sidebar-w: 240px; }
+    .admin-layout { display:flex; min-height:100vh; }
+    .admin-sidebar {
+      width:var(--sidebar-w); background:var(--text-dark); color:rgba(255,255,255,.85);
+      flex-shrink:0; position:fixed; top:0; left:0; height:100vh; overflow-y:auto; z-index:100;
+      display:flex; flex-direction:column;
+    }
+    .admin-logo { padding:24px 20px; border-bottom:1px solid rgba(255,255,255,.08); }
+    .admin-logo .logo-text { color:var(--bg-cream); }
+    .admin-logo .logo-text span { color:var(--green-light); }
+    .admin-nav { flex:1; padding:12px 0; }
+    .admin-nav-item { display:flex; align-items:center; gap:10px; padding:11px 20px; font-size:.9rem; font-weight:500; cursor:pointer; transition:var(--transition); color:rgba(255,255,255,.7); border-left:3px solid transparent; }
+    .admin-nav-item:hover { background:rgba(255,255,255,.06); color:rgba(255,255,255,.95); }
+    .admin-nav-item.active { background:rgba(193,124,60,.2); color:var(--primary-light); border-left-color:var(--primary); }
+    .admin-nav-item i { width:20px; text-align:center; font-size:.95rem; }
+    .admin-nav-group { padding:12px 20px 4px; font-size:.7rem; text-transform:uppercase; letter-spacing:1.5px; color:rgba(255,255,255,.35); font-weight:600; }
+    .admin-main { margin-left:var(--sidebar-w); flex:1; background:var(--bg); }
+    .admin-topbar { background:var(--white); border-bottom:1px solid var(--border-light); padding:14px 28px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:50; }
+    .admin-topbar h1 { font-size:1.2rem; font-weight:700; color:var(--text-dark); }
+    .admin-content { padding:28px; }
+    /* Stats */
+    .stats-cards { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:28px; }
+    .stat-card-admin { background:var(--white); border:1px solid var(--border-light); border-radius:var(--radius); padding:20px; }
+    .stat-card-admin .icon { width:44px;height:44px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:1.1rem;margin-bottom:12px; }
+    .stat-card-admin .val { font-size:1.8rem; font-weight:700; font-family:var(--font-heading); margin-bottom:4px; }
+    .stat-card-admin .lbl { font-size:.8rem; color:var(--text-light); }
+    .stat-card-admin .trend { font-size:.78rem; font-weight:600; margin-top:8px; }
+    .trend-up { color:var(--green); }
+    .trend-down { color:var(--red); }
+    /* Table */
+    .admin-table-wrap { background:var(--white); border:1px solid var(--border-light); border-radius:var(--radius-lg); overflow:hidden; }
+    .admin-table-header { padding:16px 20px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border-light); }
+    .admin-table-header h3 { font-size:1rem; font-weight:700; }
+    table.admin-table { width:100%; border-collapse:collapse; }
+    .admin-table th { padding:12px 16px; text-align:left; font-size:.78rem; text-transform:uppercase; letter-spacing:.5px; color:var(--text-light); font-weight:600; border-bottom:1px solid var(--border-light); background:var(--bg-cream); }
+    .admin-table td { padding:13px 16px; border-bottom:1px solid var(--border-light); font-size:.88rem; }
+    .admin-table tr:last-child td { border-bottom:none; }
+    .admin-table tr:hover td { background:var(--bg-light); }
+    /* Chart */
+    .charts-grid { display:grid; grid-template-columns:2fr 1fr; gap:20px; margin-bottom:28px; }
+    .chart-card { background:var(--white); border:1px solid var(--border-light); border-radius:var(--radius-lg); padding:20px; }
+    .chart-card h3 { font-size:1rem; font-weight:700; margin-bottom:16px; }
+    /* Products */
+    .product-thumb-admin { width:42px;height:42px;border-radius:var(--radius-sm);object-fit:cover;border:1px solid var(--border-light); }
+    /* Panel switch */
+    .admin-panel { display:none; }
+    .admin-panel.active { display:block; }
+    /* Status update dropdown */
+    .status-select { border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:5px 8px;font-size:.82rem;outline:none;cursor:pointer;background:var(--white); }
+    @media(max-width:1024px) { .stats-cards{grid-template-columns:1fr 1fr} .charts-grid{grid-template-columns:1fr} }
+    @media(max-width:768px) { .admin-sidebar{transform:translateX(-100%);transition:transform .3s} .admin-sidebar.open{transform:none} .admin-main{margin-left:0} }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN GATE -->
+<div id="admin-login-gate" style="position:fixed;inset:0;background:var(--text-dark);display:flex;align-items:center;justify-content:center;z-index:9999">
+  <div style="background:var(--white);border-radius:var(--radius-lg);padding:40px;width:380px;text-align:center">
+    <div style="font-family:var(--font-heading);font-size:1.8rem;font-weight:700;margin-bottom:4px">Nat<span style="color:var(--green)">Herb</span></div>
+    <p style="font-size:.8rem;color:var(--text-light);margin-bottom:28px">Admin Dashboard</p>
+    <div class="form-group"><label class="form-label">Admin Email</label><input type="email" id="admin-email" class="form-control" value="admin@natherb.com"></div>
+    <div class="form-group"><label class="form-label">Password</label><input type="password" id="admin-pwd" class="form-control" value="admin123" placeholder="admin123"></div>
+    <button class="btn btn-primary btn-block" onclick="adminLogin()">Access Dashboard</button>
+    <p style="margin-top:14px;font-size:.78rem;color:var(--text-light)">Default: admin@natherb.com / admin123</p>
+    <a href="index.html" style="display:block;margin-top:10px;font-size:.82rem;color:var(--text-light)">← Back to Store</a>
+  </div>
+</div>
+
+<div class="admin-layout" id="admin-app" style="display:none">
+  <!-- SIDEBAR -->
+  <aside class="admin-sidebar">
+    <div class="admin-logo">
+      <div class="logo-text">Nat<span>Herb</span></div>
+      <div style="font-size:.72rem;opacity:.6;margin-top:2px">Admin Dashboard</div>
+    </div>
+    <nav class="admin-nav">
+      <div class="admin-nav-group">Overview</div>
+      <div class="admin-nav-item active" onclick="showAdminPanel('dashboard',this)"><i class="fas fa-th-large"></i> Dashboard</div>
+      <div class="admin-nav-group">Commerce</div>
+      <div class="admin-nav-item" onclick="showAdminPanel('orders',this)"><i class="fas fa-box"></i> Orders</div>
+      <div class="admin-nav-item" onclick="showAdminPanel('products',this)"><i class="fas fa-leaf"></i> Products</div>
+      <div class="admin-nav-item" onclick="showAdminPanel('customers',this)"><i class="fas fa-users"></i> Customers</div>
+      <div class="admin-nav-group">Support</div>
+      <div class="admin-nav-item" onclick="showAdminPanel('tickets',this)"><i class="fas fa-headset"></i> Support Tickets</div>
+      <div class="admin-nav-group">Settings</div>
+      <div class="admin-nav-item" onclick="showAdminPanel('coupons',this)"><i class="fas fa-tag"></i> Coupons</div>
+      <div class="admin-nav-item" onclick="window.location='index.html'"><i class="fas fa-store"></i> View Store</div>
+    </nav>
+    <div style="padding:16px;border-top:1px solid rgba(255,255,255,.08)">
+      <div style="font-size:.82rem;opacity:.7">Logged as Admin</div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <h1 id="admin-page-title">Dashboard Overview</h1>
+      <div style="display:flex;align-items:center;gap:12px">
+        <span style="font-size:.82rem;color:var(--text-light)" id="admin-last-updated"></span>
+        <button class="btn btn-primary btn-sm" onclick="refreshData()"><i class="fas fa-sync-alt"></i> Refresh</button>
+        <a href="index.html" class="btn btn-outline-dark btn-sm"><i class="fas fa-store"></i> View Store</a>
+      </div>
+    </div>
+    <div class="admin-content">
+
+      <!-- DASHBOARD PANEL -->
+      <div class="admin-panel active" id="panel-dashboard">
+        <div class="stats-cards">
+          <div class="stat-card-admin">
+            <div class="icon" style="background:rgba(193,124,60,.1);color:var(--primary)"><i class="fas fa-box"></i></div>
+            <div class="val" id="stat-orders">—</div>
+            <div class="lbl">Total Orders</div>
+            <div class="trend trend-up"><i class="fas fa-arrow-up"></i> +12% this week</div>
+          </div>
+          <div class="stat-card-admin">
+            <div class="icon" style="background:rgba(90,138,90,.1);color:var(--green)"><i class="fas fa-rupee-sign"></i></div>
+            <div class="val" id="stat-revenue">—</div>
+            <div class="lbl">Total Revenue</div>
+            <div class="trend trend-up"><i class="fas fa-arrow-up"></i> +8% this month</div>
+          </div>
+          <div class="stat-card-admin">
+            <div class="icon" style="background:rgba(74,144,226,.1);color:#4A90E2"><i class="fas fa-users"></i></div>
+            <div class="val" id="stat-customers">—</div>
+            <div class="lbl">Customers</div>
+            <div class="trend trend-up"><i class="fas fa-arrow-up"></i> +23 today</div>
+          </div>
+          <div class="stat-card-admin">
+            <div class="icon" style="background:rgba(224,92,92,.1);color:var(--red)"><i class="fas fa-ticket-alt"></i></div>
+            <div class="val" id="stat-tickets">—</div>
+            <div class="lbl">Open Tickets</div>
+            <div class="trend trend-down" id="ticket-trend"><i class="fas fa-arrow-down"></i> Needs attention</div>
+          </div>
+        </div>
+
+        <div class="charts-grid">
+          <div class="chart-card">
+            <h3>Revenue & Orders (Last 7 Days)</h3>
+            <div style="height:250px"><canvas id="revenue-chart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h3>Orders by Category</h3>
+            <div style="height:250px"><canvas id="category-chart"></canvas></div>
+          </div>
+        </div>
+
+        <div class="admin-table-wrap">
+          <div class="admin-table-header">
+            <h3>Recent Orders</h3>
+            <a href="#" onclick="showAdminPanel('orders',null)" style="font-size:.85rem;color:var(--primary)">View all →</a>
+          </div>
+          <div id="recent-orders-table" style="overflow-x:auto">
+            <div class="loading-spinner"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ORDERS PANEL -->
+      <div class="admin-panel" id="panel-orders">
+        <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+          <input type="text" id="order-search" class="form-control" placeholder="Search orders..." style="max-width:260px" oninput="filterAdminOrders(this.value)">
+          <select class="sort-select" id="order-filter-status" onchange="filterAdminOrders('')">
+            <option value="">All Statuses</option>
+            <option>pending</option><option>confirmed</option><option>processing</option>
+            <option>shipped</option><option>delivered</option><option>cancelled</option>
+          </select>
+          <a href="#" class="btn btn-primary btn-sm" onclick="exportOrders()"><i class="fas fa-download"></i> Export CSV</a>
+        </div>
+        <div class="admin-table-wrap">
+          <div id="orders-table" style="overflow-x:auto"><div class="loading-spinner"></div></div>
+        </div>
+      </div>
+
+      <!-- PRODUCTS PANEL -->
+      <div class="admin-panel" id="panel-products">
+        <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+          <input type="text" id="product-search-admin" class="form-control" placeholder="Search products..." style="max-width:260px">
+          <button class="btn btn-primary btn-sm" onclick="showAddProductModal()"><i class="fas fa-plus"></i> Add Product</button>
+        </div>
+        <div class="admin-table-wrap">
+          <div id="products-table" style="overflow-x:auto"><div class="loading-spinner"></div></div>
+        </div>
+      </div>
+
+      <!-- CUSTOMERS PANEL -->
+      <div class="admin-panel" id="panel-customers">
+        <div class="admin-table-wrap">
+          <div class="admin-table-header"><h3>All Customers</h3><span id="customers-count" style="font-size:.85rem;color:var(--text-light)"></span></div>
+          <div id="customers-table" style="overflow-x:auto"><div class="loading-spinner"></div></div>
+        </div>
+      </div>
+
+      <!-- TICKETS PANEL -->
+      <div class="admin-panel" id="panel-tickets">
+        <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+          <select class="sort-select" id="ticket-filter-status" onchange="loadAdminTickets()">
+            <option value="">All Statuses</option>
+            <option>open</option><option>in_progress</option><option>resolved</option><option>closed</option>
+          </select>
+        </div>
+        <div class="admin-table-wrap">
+          <div id="tickets-table" style="overflow-x:auto"><div class="loading-spinner"></div></div>
+        </div>
+      </div>
+
+      <!-- COUPONS PANEL -->
+      <div class="admin-panel" id="panel-coupons">
+        <div style="margin-bottom:20px">
+          <button class="btn btn-primary btn-sm" onclick="showAddCouponForm()"><i class="fas fa-plus"></i> Create Coupon</button>
+        </div>
+        <div id="add-coupon-form" style="display:none;background:var(--white);border:1px solid var(--border-light);border-radius:var(--radius);padding:20px;margin-bottom:20px">
+          <h3 style="font-family:var(--font-heading);margin-bottom:16px">New Coupon</h3>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Code</label><input type="text" class="form-control" id="nc-code" placeholder="SAVE20" style="text-transform:uppercase"></div>
+            <div class="form-group"><label class="form-label">Type</label><select class="form-control" id="nc-type"><option value="percentage">Percentage %</option><option value="fixed">Fixed ₹</option></select></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Value</label><input type="number" class="form-control" id="nc-value" placeholder="e.g. 20"></div>
+            <div class="form-group"><label class="form-label">Min Order ₹</label><input type="number" class="form-control" id="nc-min" placeholder="e.g. 499"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Max Discount ₹</label><input type="number" class="form-control" id="nc-max" placeholder="e.g. 300"></div>
+            <div class="form-group"><label class="form-label">Description</label><input type="text" class="form-control" id="nc-desc" placeholder="Coupon description"></div>
+          </div>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-primary btn-sm" onclick="createCoupon()">Create Coupon</button>
+            <button class="btn btn-outline-dark btn-sm" onclick="document.getElementById('add-coupon-form').style.display='none'">Cancel</button>
+          </div>
+        </div>
+        <div class="admin-table-wrap">
+          <div id="coupons-table" style="overflow-x:auto"><div class="loading-spinner"></div></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- Update Order Status Modal -->
+<div class="modal-backdrop" id="update-order-modal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header"><h2 class="modal-title">Update Order</h2><button class="modal-close" onclick="closeOrderModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Order Status</label>
+        <select class="form-control" id="modal-order-status">
+          <option value="pending">Pending</option>
+          <option value="confirmed">Confirmed</option>
+          <option value="processing">Processing</option>
+          <option value="shipped">Shipped</option>
+          <option value="delivered">Delivered</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tracking Number</label>
+        <input type="text" class="form-control" id="modal-tracking">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Courier</label>
+        <input type="text" class="form-control" id="modal-courier" placeholder="e.g. Delhivery, BlueDart">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline-dark btn-sm" onclick="closeOrderModal()">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="updateOrderStatus()">Update Order</button>
+    </div>
+  </div>
+</div>
+
+<!-- Ticket Reply Modal -->
+<div class="modal-backdrop" id="reply-ticket-modal">
+  <div class="modal">
+    <div class="modal-header"><h2 class="modal-title">Reply to Ticket</h2><button class="modal-close" onclick="closeTicketModal()">✕</button></div>
+    <div class="modal-body">
+      <div id="ticket-modal-info" style="background:var(--bg-cream);padding:12px;border-radius:var(--radius-sm);margin-bottom:14px;font-size:.85rem"></div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-control" id="modal-ticket-status">
+          <option value="open">Open</option>
+          <option value="in_progress">In Progress</option>
+          <option value="resolved">Resolved</option>
+          <option value="closed">Closed</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Your Response</label>
+        <textarea class="form-control" id="modal-ticket-response" placeholder="Write your response to the customer..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline-dark btn-sm" onclick="closeTicketModal()">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="replyToTicket()">Send Response</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script src="js/utils.js"></script>
+<script>
+let adminOrders = [], currentEditOrderId = null, currentTicketId = null;
+
+function adminLogin() {
+  const email = document.getElementById('admin-email').value;
+  const pwd = document.getElementById('admin-pwd').value;
+  if (email === 'admin@natherb.com' && pwd === 'admin123') {
+    document.getElementById('admin-login-gate').style.display = 'none';
+    document.getElementById('admin-app').style.display = 'flex';
+    loadDashboard();
+    document.getElementById('admin-last-updated').textContent = 'Updated: ' + new Date().toLocaleTimeString('en-IN');
+  } else {
+    showToast('Invalid credentials. Use admin@natherb.com / admin123', 'error');
+  }
+}
+
+async function loadDashboard() {
+  try {
+    const [ordersRes, usersRes, ticketsRes, productsRes] = await Promise.all([
+      apiGet('orders', { limit: 100 }),
+      apiGet('users', { limit: 100 }),
+      apiGet('support_tickets', { limit: 100 }),
+      apiGet('products', { limit: 100 })
+    ]);
+    const orders = ordersRes.data || [];
+    const users = usersRes.data || [];
+    const tickets = ticketsRes.data || [];
+    const products = productsRes.data || [];
+    adminOrders = orders;
+    // Stats
+    const revenue = orders.filter(o => o.payment_status === 'paid').reduce((s, o) => s + (o.total||0), 0);
+    const openTickets = tickets.filter(t => t.status === 'open' || t.status === 'in_progress').length;
+    document.getElementById('stat-orders').textContent = orders.length;
+    document.getElementById('stat-revenue').textContent = revenue >= 1000 ? '₹' + (revenue/1000).toFixed(1) + 'K' : formatPrice(revenue);
+    document.getElementById('stat-customers').textContent = users.length;
+    document.getElementById('stat-tickets').textContent = openTickets;
+    // Charts
+    initCharts(orders);
+    // Recent orders table
+    renderAdminOrdersTable(orders.slice(0, 10), 'recent-orders-table', true);
+  } catch(e) { showToast('Error loading dashboard data', 'error'); }
+}
+
+function initCharts(orders) {
+  // Revenue chart
+  const labels = [];
+  const revenues = [];
+  const orderCounts = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dayStr = d.toLocaleDateString('en-IN', { day:'numeric', month:'short' });
+    labels.push(dayStr);
+    const dayOrders = orders.filter(o => {
+      const od = new Date(o.created_at);
+      return od.toDateString() === d.toDateString();
+    });
+    revenues.push(dayOrders.reduce((s,o) => s + (o.total||0), 0));
+    orderCounts.push(dayOrders.length);
+  }
+  const ctx1 = document.getElementById('revenue-chart')?.getContext('2d');
+  if (ctx1) new Chart(ctx1, {
+    type:'bar',
+    data: { labels, datasets: [
+      { label:'Revenue (₹)', data:revenues, backgroundColor:'rgba(193,124,60,.6)', borderColor:'var(--primary)', borderWidth:1, yAxisID:'y' },
+      { label:'Orders', data:orderCounts, type:'line', borderColor:'var(--green)', backgroundColor:'rgba(90,138,90,.1)', borderWidth:2, pointBackgroundColor:'var(--green)', yAxisID:'y1' }
+    ]},
+    options: { responsive:true, maintainAspectRatio:false, scales:{ y:{position:'left'}, y1:{position:'right',grid:{drawOnChartArea:false}} }, plugins:{legend:{position:'top'}} }
+  });
+
+  // Category chart
+  const cats = {};
+  orders.forEach(o => {
+    try {
+      const items = typeof o.items === 'string' ? JSON.parse(o.items) : (o.items||[]);
+      items.forEach(() => { cats['Hair'] = (cats['Hair']||0) + 1; });
+    } catch {}
+  });
+  const ctx2 = document.getElementById('category-chart')?.getContext('2d');
+  if (ctx2) new Chart(ctx2, {
+    type:'doughnut',
+    data: { labels:['Hair','Face','Body','Combo','Other'], datasets:[{ data:[42,28,15,10,5], backgroundColor:['#C17C3C','#5A8A5A','#D4956A','#D4AF37','#E8936A'] }] },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'right'}} }
+  });
+}
+
+function renderAdminOrdersTable(orders, containerId, mini = false) {
+  const container = document.getElementById(containerId);
+  if (!orders.length) { container.innerHTML = '<p style="padding:20px;color:var(--text-light);text-align:center">No orders found.</p>'; return; }
+  container.innerHTML = `<table class="admin-table">
+    <thead><tr>
+      <th>Order</th><th>Customer</th><th>Amount</th><th>Status</th><th>Payment</th><th>Date</th>
+      ${!mini ? '<th>Actions</th>' : ''}
+    </tr></thead>
+    <tbody>${orders.map(o => `
+      <tr>
+        <td><strong>#${o.order_number||o.id?.substring(0,8)}</strong></td>
+        <td><div>${o.user_name||'—'}</div><div style="font-size:.75rem;color:var(--text-light)">${o.user_email||''}</div></td>
+        <td><strong>${formatPrice(o.total||0)}</strong></td>
+        <td><span class="order-status-badge status-${o.status||'pending'}">${(o.status||'pending')}</span></td>
+        <td><span style="font-size:.78rem;${o.payment_status==='paid'?'color:var(--green)':'color:var(--red)'}">${(o.payment_method||'').toUpperCase()} • ${(o.payment_status||'').toUpperCase()}</span></td>
+        <td>${o.created_at ? formatDate(o.created_at) : '—'}</td>
+        ${!mini ? `<td>
+          <div style="display:flex;gap:6px">
+            <a href="invoice.html?id=${o.id}" class="btn btn-outline-dark btn-sm" style="padding:4px 10px;font-size:.75rem"><i class="fas fa-file"></i></a>
+            <button onclick="openOrderModal('${o.id}','${o.status}','${o.tracking_number||''}','${o.courier||''}')" class="btn btn-primary btn-sm" style="padding:4px 10px;font-size:.75rem"><i class="fas fa-edit"></i></button>
+          </div>
+        </td>` : ''}
+      </tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+
+async function loadAdminOrders() {
+  const statusFilter = document.getElementById('order-filter-status')?.value || '';
+  const res = await apiGet('orders', { limit: 100 });
+  let orders = res.data || [];
+  if (statusFilter) orders = orders.filter(o => o.status === statusFilter);
+  adminOrders = orders;
+  renderAdminOrdersTable(orders, 'orders-table');
+}
+
+function filterAdminOrders(query) {
+  const statusFilter = document.getElementById('order-filter-status')?.value || '';
+  let filtered = adminOrders;
+  if (statusFilter) filtered = filtered.filter(o => o.status === statusFilter);
+  if (query) filtered = filtered.filter(o => (o.order_number||'').includes(query) || (o.user_name||'').toLowerCase().includes(query.toLowerCase()) || (o.user_email||'').toLowerCase().includes(query.toLowerCase()));
+  renderAdminOrdersTable(filtered, 'orders-table');
+}
+
+async function loadAdminProducts() {
+  const res = await apiGet('products', { limit: 100 });
+  const products = res.data || [];
+  document.getElementById('products-table').innerHTML = `<table class="admin-table">
+    <thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Stock</th><th>Rating</th><th>Badge</th></tr></thead>
+    <tbody>${products.map(p => `
+      <tr>
+        <td style="display:flex;align-items:center;gap:10px"><img src="${p.image}" class="product-thumb-admin" onerror="this.src='https://placehold.co/42/fdf5eb/c17c3c?text=NH'">${p.name}</td>
+        <td>${p.category || '—'}</td>
+        <td><strong>${formatPrice(p.price)}</strong><div style="font-size:.75rem;color:var(--text-light)">${formatPrice(p.original_price)}</div></td>
+        <td>${p.stock || 0}</td>
+        <td>${p.rating || '—'} ★ <span style="color:var(--text-light)">(${p.reviews_count||0})</span></td>
+        <td>${p.badge ? `<span class="product-badge" style="position:static;font-size:.7rem">${p.badge}</span>` : '—'}</td>
+      </tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+
+async function loadAdminCustomers() {
+  const res = await apiGet('users', { limit: 100 });
+  const users = res.data || [];
+  document.getElementById('customers-count').textContent = users.length + ' customers';
+  document.getElementById('customers-table').innerHTML = `<table class="admin-table">
+    <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Skin Type</th><th>Joined</th></tr></thead>
+    <tbody>${users.map(u => `
+      <tr>
+        <td><strong>${u.name||'—'}</strong></td>
+        <td>${u.email||'—'}</td>
+        <td>${u.phone||'—'}</td>
+        <td>${u.skin_type||'—'}</td>
+        <td>${u.created_at ? formatDate(u.created_at) : '—'}</td>
+      </tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+
+async function loadAdminTickets() {
+  const statusFilter = document.getElementById('ticket-filter-status')?.value || '';
+  const res = await apiGet('support_tickets', { limit: 100 });
+  let tickets = res.data || [];
+  if (statusFilter) tickets = tickets.filter(t => t.status === statusFilter);
+  const colors = { open:'var(--primary)', in_progress:'var(--gold)', resolved:'var(--green)', closed:'var(--text-light)' };
+  document.getElementById('tickets-table').innerHTML = `<table class="admin-table">
+    <thead><tr><th>Ticket</th><th>Customer</th><th>Subject</th><th>Category</th><th>Status</th><th>Priority</th><th>Action</th></tr></thead>
+    <tbody>${tickets.map(t => `
+      <tr>
+        <td><strong>${t.ticket_number||'—'}</strong><div style="font-size:.72rem;color:var(--text-light)">${t.created_at?formatDate(t.created_at):''}</div></td>
+        <td>${t.user_name||'—'}<div style="font-size:.75rem;color:var(--text-light)">${t.user_email||''}</div></td>
+        <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.subject||'—'}</td>
+        <td>${t.category||'—'}</td>
+        <td><span style="color:${colors[t.status]||'var(--primary)'};font-weight:600;font-size:.78rem">● ${(t.status||'open').toUpperCase()}</span></td>
+        <td><span style="font-size:.75rem;padding:2px 8px;border-radius:10px;background:rgba(0,0,0,.06)">${t.priority||'medium'}</span></td>
+        <td><button onclick="openTicketModal('${t.id}','${t.status}',\`${(t.subject||'').replace(/`/g,"'")}\`,\`${(t.message||'').replace(/`/g,"'").substring(0,100)}\`)" class="btn btn-primary btn-sm" style="padding:4px 10px;font-size:.75rem">Reply</button></td>
+      </tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+
+async function loadAdminCoupons() {
+  const res = await apiGet('coupons', { limit: 50 });
+  const coupons = res.data || [];
+  document.getElementById('coupons-table').innerHTML = `<table class="admin-table">
+    <thead><tr><th>Code</th><th>Type</th><th>Value</th><th>Min Order</th><th>Max Discount</th><th>Usage</th><th>Status</th></tr></thead>
+    <tbody>${coupons.map(c => `
+      <tr>
+        <td><strong>${c.code}</strong><div style="font-size:.75rem;color:var(--text-light)">${c.description||''}</div></td>
+        <td>${c.type === 'percentage' ? `${c.value}% off` : '₹' + c.value + ' off'}</td>
+        <td>${c.type === 'percentage' ? c.value + '%' : '₹' + c.value}</td>
+        <td>₹${c.min_order||0}</td>
+        <td>₹${c.max_discount||'—'}</td>
+        <td>${c.used_count||0} / ${c.usage_limit||'∞'}</td>
+        <td><span style="color:${c.is_active?'var(--green)':'var(--red)'};font-weight:600;font-size:.82rem">● ${c.is_active?'Active':'Inactive'}</span></td>
+      </tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+
+async function createCoupon() {
+  const code = document.getElementById('nc-code').value.trim().toUpperCase();
+  const type = document.getElementById('nc-type').value;
+  const value = parseFloat(document.getElementById('nc-value').value);
+  const minOrder = parseFloat(document.getElementById('nc-min').value) || 0;
+  const maxDisc = parseFloat(document.getElementById('nc-max').value) || 0;
+  const desc = document.getElementById('nc-desc').value;
+  if (!code || !value) { showToast('Please fill code and value', 'error'); return; }
+  try {
+    await apiPost('coupons', { code, type, value, min_order:minOrder, max_discount:maxDisc, description:desc, is_active:true, used_count:0, usage_limit:1000 });
+    showToast('Coupon created! 🎉', 'success');
+    document.getElementById('add-coupon-form').style.display = 'none';
+    loadAdminCoupons();
+  } catch { showToast('Error creating coupon', 'error'); }
+}
+
+function showAddCouponForm() { document.getElementById('add-coupon-form').style.display = document.getElementById('add-coupon-form').style.display === 'none' ? 'block' : 'none'; }
+function showAddProductModal() { showToast('Product editor coming soon!', 'info'); }
+
+function openOrderModal(id, status, tracking, courier) {
+  currentEditOrderId = id;
+  document.getElementById('modal-order-status').value = status || 'pending';
+  document.getElementById('modal-tracking').value = tracking || '';
+  document.getElementById('modal-courier').value = courier || '';
+  document.getElementById('update-order-modal').classList.add('open');
+}
+function closeOrderModal() { document.getElementById('update-order-modal').classList.remove('open'); currentEditOrderId = null; }
+
+async function updateOrderStatus() {
+  if (!currentEditOrderId) return;
+  const status = document.getElementById('modal-order-status').value;
+  const tracking = document.getElementById('modal-tracking').value;
+  const courier = document.getElementById('modal-courier').value;
+  try {
+    await apiPatch('orders', currentEditOrderId, { status, tracking_number:tracking, courier, payment_status: status === 'delivered' ? 'paid' : undefined });
+    closeOrderModal();
+    showToast('Order updated!', 'success');
+    loadDashboard();
+    loadAdminOrders();
+  } catch { showToast('Error updating order', 'error'); }
+}
+
+function openTicketModal(id, status, subject, message) {
+  currentTicketId = id;
+  document.getElementById('modal-ticket-status').value = status || 'open';
+  document.getElementById('ticket-modal-info').innerHTML = `<strong>${subject}</strong><br><span style="color:var(--text-medium)">${message}...</span>`;
+  document.getElementById('reply-ticket-modal').classList.add('open');
+}
+function closeTicketModal() { document.getElementById('reply-ticket-modal').classList.remove('open'); currentTicketId = null; }
+
+async function replyToTicket() {
+  if (!currentTicketId) return;
+  const status = document.getElementById('modal-ticket-status').value;
+  const response = document.getElementById('modal-ticket-response').value.trim();
+  if (!response) { showToast('Please write a response', 'error'); return; }
+  try {
+    await apiPatch('support_tickets', currentTicketId, { status, response });
+    closeTicketModal();
+    showToast('Response sent!', 'success');
+    loadAdminTickets();
+  } catch { showToast('Error sending response', 'error'); }
+}
+
+function showAdminPanel(panelId, navItem) {
+  document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-'+panelId)?.classList.add('active');
+  if (navItem) {
+    document.querySelectorAll('.admin-nav-item').forEach(n => n.classList.remove('active'));
+    navItem.classList.add('active');
+  }
+  const titles = { dashboard:'Dashboard Overview', orders:'Orders Management', products:'Products Catalog', customers:'Customer Database', tickets:'Support Tickets', coupons:'Coupon Management' };
+  document.getElementById('admin-page-title').textContent = titles[panelId] || 'Dashboard';
+  // Load data for panel
+  const loaders = { orders: loadAdminOrders, products: loadAdminProducts, customers: loadAdminCustomers, tickets: loadAdminTickets, coupons: loadAdminCoupons };
+  if (loaders[panelId]) loaders[panelId]();
+}
+
+function refreshData() {
+  loadDashboard();
+  document.getElementById('admin-last-updated').textContent = 'Updated: ' + new Date().toLocaleTimeString('en-IN');
+  showToast('Data refreshed!', 'success');
+}
+
+function exportOrders() {
+  const csv = ['Order Number,Customer,Email,Amount,Status,Payment,Date'];
+  adminOrders.forEach(o => {
+    csv.push([o.order_number, o.user_name, o.user_email, o.total, o.status, o.payment_method, o.created_at ? new Date(o.created_at).toLocaleDateString() : ''].join(','));
+  });
+  const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'natherb-orders.csv';
+  a.click(); URL.revokeObjectURL(url);
+  showToast('Orders exported!', 'success');
+}
+
+// Allow Enter key for admin login
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('admin-pwd')?.addEventListener('keydown', e => { if (e.key === 'Enter') adminLogin(); });
+  document.getElementById('admin-email')?.addEventListener('keydown', e => { if (e.key === 'Enter') adminLogin(); });
+});
+</script>
+</body>
+</html>

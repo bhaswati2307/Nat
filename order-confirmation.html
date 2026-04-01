@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Confirmed – NatHerb</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+  <style>
+    .confirmation-page { min-height:80vh; display:flex; align-items:center; justify-content:center; padding:60px 20px; }
+    .confirmation-card { background:var(--white); border:1px solid var(--border-light); border-radius:var(--radius-lg); padding:40px; max-width:640px; width:100%; text-align:center; box-shadow:var(--shadow-md); }
+    .success-icon { width:80px;height:80px;background:rgba(90,138,90,.1);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2.4rem;margin:0 auto 20px;border:3px solid var(--green); }
+    .order-details-grid { display:grid;grid-template-columns:1fr 1fr;gap:14px;text-align:left;margin:24px 0;background:var(--bg-cream);border-radius:var(--radius);padding:20px; }
+    .order-detail-item label { font-size:.75rem;color:var(--text-light);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:3px; }
+    .order-detail-item span { font-size:.92rem;font-weight:600;color:var(--text-dark); }
+    .timeline-simple { display:flex;justify-content:space-between;margin:24px 0;position:relative; }
+    .timeline-simple::before { content:'';position:absolute;top:18px;left:10%;right:10%;height:2px;background:var(--border-light); }
+    .tl-step { display:flex;flex-direction:column;align-items:center;gap:8px;z-index:1; }
+    .tl-dot { width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.9rem;border:2px solid var(--border-light);background:var(--white); }
+    .tl-dot.done { background:var(--green);border-color:var(--green);color:white; }
+    .tl-dot.active { background:var(--primary);border-color:var(--primary);color:white; }
+    .tl-label { font-size:.72rem;color:var(--text-light);text-align:center;max-width:60px; }
+    @media(max-width:600px){.order-details-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="logo"><div><div class="logo-text">Nat<span>Herb</span></div></div></a>
+    <div style="flex:1;text-align:center;color:var(--green);font-weight:600"><i class="fas fa-check-circle"></i> Order Confirmed!</div>
+    <a href="shop.html" style="font-size:.9rem;color:var(--primary)">Continue Shopping</a>
+  </div>
+</header>
+
+<div class="confirmation-page">
+  <div class="confirmation-card">
+    <div class="success-icon">🎉</div>
+    <h1 style="font-family:var(--font-heading);font-size:2rem;color:var(--green);margin-bottom:8px">Order Placed Successfully!</h1>
+    <p style="color:var(--text-light);margin-bottom:6px">Thank you for shopping with NatHerb!</p>
+    <p style="font-size:.9rem;color:var(--text-medium)">We've sent a confirmation to your email. Your order will be dispatched within 24 hours.</p>
+
+    <div class="order-details-grid" id="order-details">
+      <div class="order-detail-item"><label>Order Number</label><span id="conf-order-num">Loading...</span></div>
+      <div class="order-detail-item"><label>Total Amount</label><span id="conf-total">–</span></div>
+      <div class="order-detail-item"><label>Payment Method</label><span id="conf-payment">–</span></div>
+      <div class="order-detail-item"><label>Estimated Delivery</label><span id="conf-delivery">3–5 Business Days</span></div>
+    </div>
+
+    <!-- Order Timeline -->
+    <div class="timeline-simple">
+      <div class="tl-step">
+        <div class="tl-dot done"><i class="fas fa-check"></i></div>
+        <span class="tl-label">Order Placed</span>
+      </div>
+      <div class="tl-step">
+        <div class="tl-dot active"><i class="fas fa-cog"></i></div>
+        <span class="tl-label">Processing</span>
+      </div>
+      <div class="tl-step">
+        <div class="tl-dot"><i class="fas fa-truck"></i></div>
+        <span class="tl-label">Shipped</span>
+      </div>
+      <div class="tl-step">
+        <div class="tl-dot"><i class="fas fa-home"></i></div>
+        <span class="tl-label">Delivered</span>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:24px">
+      <a href="orders.html" class="btn btn-primary"><i class="fas fa-box"></i> Track My Order</a>
+      <a id="invoice-btn" href="#" class="btn btn-outline-dark"><i class="fas fa-file-invoice"></i> View Invoice</a>
+      <a href="shop.html" class="btn btn-outline-dark"><i class="fas fa-shopping-bag"></i> Shop More</a>
+    </div>
+
+    <div style="margin-top:24px;padding:16px;background:rgba(90,138,90,.06);border-radius:var(--radius-sm);border:1px solid rgba(90,138,90,.2)">
+      <p style="font-size:.82rem;color:var(--green);font-weight:600">🌿 Did you know?</p>
+      <p style="font-size:.8rem;color:var(--text-medium);margin-top:4px">Your order is being freshly prepared in our Ayurvedic kitchen. No stale stock, ever!</p>
+    </div>
+
+    <div style="margin-top:16px;font-size:.8rem;color:var(--text-light)">
+      Need help? <a href="support.html" style="color:var(--primary)">Contact Support</a>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+<script src="js/utils.js"></script>
+<script>
+async function loadOrderDetails() {
+  const params = new URLSearchParams(window.location.search);
+  const orderNumber = params.get('order');
+  const orderId = params.get('id');
+  if (orderNumber) {
+    document.getElementById('conf-order-num').textContent = '#' + orderNumber;
+    document.getElementById('invoice-btn').href = 'invoice.html?order=' + orderNumber + (orderId ? '&id=' + orderId : '');
+  }
+  if (orderId) {
+    try {
+      const order = await fetch(`tables/orders/${orderId}`).then(r => r.json());
+      if (order) {
+        document.getElementById('conf-total').textContent = formatPrice(order.total);
+        document.getElementById('conf-payment').textContent = order.payment_method?.toUpperCase() || '–';
+        document.getElementById('conf-delivery').textContent = order.estimated_delivery || '3–5 Business Days';
+      }
+    } catch {}
+  }
+}
+loadOrderDetails();
+</script>
+</body>
+</html>

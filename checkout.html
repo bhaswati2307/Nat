@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout – NatHerb</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+  <style>
+    .checkout-layout { display:grid; grid-template-columns:1fr 420px; gap:40px; padding:40px 0 80px; }
+    .checkout-section { background:var(--white); border:1px solid var(--border-light); border-radius:var(--radius-lg); padding:28px; margin-bottom:20px; }
+    .checkout-section h3 { font-family:var(--font-heading); font-size:1.15rem; margin-bottom:20px; display:flex; align-items:center; gap:10px; }
+    .checkout-section h3 span { width:28px;height:28px;background:var(--primary);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700; }
+    .order-summary-card { background:var(--white); border:1px solid var(--border-light); border-radius:var(--radius-lg); padding:24px; position:sticky; top:100px; }
+    .order-item { display:flex; gap:12px; padding:10px 0; border-bottom:1px solid var(--border-light); }
+    .order-item:last-of-type { border-bottom:none; }
+    .order-item img { width:60px;height:60px;border-radius:var(--radius-sm);object-fit:cover;border:1px solid var(--border-light); }
+    .order-item-name { font-size:.88rem;font-weight:600;line-height:1.4; }
+    .order-item-price { font-size:.85rem;font-weight:700;color:var(--primary); }
+    .payment-methods { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px; }
+    .payment-method {
+      border:2px solid var(--border); border-radius:var(--radius-sm); padding:14px; cursor:pointer;
+      transition:var(--transition); text-align:center; font-size:.88rem; font-weight:500;
+    }
+    .payment-method.selected { border-color:var(--primary); background:rgba(193,124,60,.06); color:var(--primary); }
+    .payment-method i { font-size:1.4rem; display:block; margin-bottom:6px; }
+    .payment-form { background:var(--bg-cream); border-radius:var(--radius-sm); padding:16px; margin-bottom:16px; }
+    .upi-input { display:flex; gap:10px; }
+    .card-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .secure-badges { display:flex; gap:12px; align-items:center; justify-content:center; margin:12px 0; opacity:.7; font-size:.75rem; }
+    .step-indicator { display:flex; align-items:center; justify-content:center; gap:0; padding:20px 0 30px; }
+    .step { display:flex; align-items:center; }
+    .step-dot { width:36px;height:36px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:600;color:var(--text-light);background:var(--white); }
+    .step-dot.done { background:var(--green);border-color:var(--green);color:white; }
+    .step-dot.active { background:var(--primary);border-color:var(--primary);color:white; }
+    .step-line { width:60px;height:2px;background:var(--border); }
+    .step-line.done { background:var(--green); }
+    .step-label { font-size:.75rem;color:var(--text-light);text-align:center;margin-top:4px; }
+    .address-card { border:1.5px solid var(--border); border-radius:var(--radius-sm); padding:14px; cursor:pointer; transition:var(--transition); margin-bottom:10px; }
+    .address-card.selected { border-color:var(--primary); background:rgba(193,124,60,.05); }
+    @media(max-width:900px){ .checkout-layout{grid-template-columns:1fr} .order-summary-card{position:static} .payment-methods{grid-template-columns:1fr 1fr} }
+    @media(max-width:600px){ .payment-methods{grid-template-columns:1fr 1fr} .card-row{grid-template-columns:1fr} }
+  </style>
+</head>
+<body>
+<!-- HEADER -->
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="logo">
+      <div><div class="logo-text">Nat<span>Herb</span></div><div class="logo-tagline">Fresh Ayurveda</div></div>
+    </a>
+    <div style="flex:1;text-align:center;font-size:.88rem;color:var(--text-light)">
+      <i class="fas fa-lock" style="color:var(--green)"></i> Secure Checkout
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:.82rem;color:var(--text-light)">
+      <i class="fas fa-phone"></i> Need help? <a href="support.html" style="color:var(--primary)">Contact us</a>
+    </div>
+  </div>
+</header>
+
+<div id="toast-container" class="toast-container"></div>
+
+<div class="container">
+  <!-- Step Indicator -->
+  <div class="step-indicator">
+    <div class="step">
+      <div>
+        <div class="step-dot active" id="step1-dot">1</div>
+        <div class="step-label">Address</div>
+      </div>
+    </div>
+    <div class="step-line" id="line-1-2"></div>
+    <div class="step">
+      <div>
+        <div class="step-dot" id="step2-dot">2</div>
+        <div class="step-label">Payment</div>
+      </div>
+    </div>
+    <div class="step-line" id="line-2-3"></div>
+    <div class="step">
+      <div>
+        <div class="step-dot" id="step3-dot">3</div>
+        <div class="step-label">Review</div>
+      </div>
+    </div>
+    <div class="step-line" id="line-3-4"></div>
+    <div class="step">
+      <div>
+        <div class="step-dot" id="step4-dot">4</div>
+        <div class="step-label">Confirm</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="checkout-layout">
+    <!-- LEFT COLUMN -->
+    <div>
+      <!-- STEP 1: CONTACT & ADDRESS -->
+      <div id="checkout-step1">
+        <div class="checkout-section">
+          <h3><span>1</span> Contact Information</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">First Name *</label>
+              <input type="text" class="form-control" id="fname" placeholder="Enter first name" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Last Name *</label>
+              <input type="text" class="form-control" id="lname" placeholder="Enter last name">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Email Address *</label>
+              <input type="email" class="form-control" id="email" placeholder="your@email.com" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Phone Number *</label>
+              <input type="tel" class="form-control" id="phone" placeholder="+91 9999999999" required>
+            </div>
+          </div>
+        </div>
+
+        <div class="checkout-section">
+          <h3><span>2</span> Delivery Address</h3>
+          <div class="form-group">
+            <label class="form-label">Address Line 1 *</label>
+            <input type="text" class="form-control" id="addr1" placeholder="House/Flat no., Building, Street" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Address Line 2</label>
+            <input type="text" class="form-control" id="addr2" placeholder="Area, Landmark (optional)">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">City *</label>
+              <input type="text" class="form-control" id="city" placeholder="City" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">State *</label>
+              <select class="form-control" id="state" required>
+                <option value="">Select State</option>
+                <option>Andhra Pradesh</option><option>Assam</option><option>Bihar</option>
+                <option>Delhi</option><option>Goa</option><option>Gujarat</option>
+                <option>Haryana</option><option>Himachal Pradesh</option><option>Jharkhand</option>
+                <option>Karnataka</option><option>Kerala</option><option>Madhya Pradesh</option>
+                <option>Maharashtra</option><option>Odisha</option><option>Punjab</option>
+                <option>Rajasthan</option><option>Tamil Nadu</option><option>Telangana</option>
+                <option>Uttar Pradesh</option><option>Uttarakhand</option><option>West Bengal</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">PIN Code *</label>
+              <input type="text" class="form-control" id="pincode" placeholder="6-digit PIN code" maxlength="6" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Country</label>
+              <input type="text" class="form-control" value="India" readonly style="background:var(--bg-cream)">
+            </div>
+          </div>
+          <label style="display:flex;align-items:center;gap:8px;font-size:.88rem;cursor:pointer">
+            <input type="checkbox" id="save-address" style="accent-color:var(--primary)"> Save this address for future orders
+          </label>
+          <div style="margin-top:20px;text-align:right">
+            <button class="btn btn-primary" onclick="goToPayment()">Continue to Payment <i class="fas fa-arrow-right"></i></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2: PAYMENT -->
+      <div id="checkout-step2" style="display:none">
+        <div class="checkout-section">
+          <h3><span>3</span> Payment Method</h3>
+          <div class="payment-methods">
+            <div class="payment-method selected" data-method="upi" onclick="selectPayment(this,'upi')">
+              <i class="fas fa-mobile-alt"></i> UPI
+            </div>
+            <div class="payment-method" data-method="card" onclick="selectPayment(this,'card')">
+              <i class="fas fa-credit-card"></i> Card
+            </div>
+            <div class="payment-method" data-method="netbanking" onclick="selectPayment(this,'netbanking')">
+              <i class="fas fa-university"></i> Net Banking
+            </div>
+            <div class="payment-method" data-method="cod" onclick="selectPayment(this,'cod')">
+              <i class="fas fa-money-bill"></i> Cash on Delivery
+            </div>
+          </div>
+
+          <!-- UPI Form -->
+          <div class="payment-form" id="payment-form-upi">
+            <p style="font-size:.88rem;font-weight:600;margin-bottom:12px">Pay via UPI</p>
+            <div class="upi-input">
+              <input type="text" class="form-control" id="upi-id" placeholder="yourname@upi (e.g. 9999999999@paytm)">
+              <button class="btn btn-primary" onclick="verifyUPI()">Verify</button>
+            </div>
+            <p style="font-size:.75rem;color:var(--text-light);margin-top:8px">Or scan QR code at payment gateway</p>
+            <div style="display:flex;gap:12px;margin-top:12px">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/UPI-Logo-vector.svg/120px-UPI-Logo-vector.svg.png" style="height:28px;object-fit:contain" alt="UPI">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Paytm_Logo_%28standalone%29.svg/120px-Paytm_Logo_%28standalone%29.svg.png" style="height:28px;object-fit:contain" alt="Paytm">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Google_Pay_Logo.svg/120px-Google_Pay_Logo.svg.png" style="height:28px;object-fit:contain" alt="GPay">
+            </div>
+          </div>
+
+          <!-- Card Form -->
+          <div class="payment-form" id="payment-form-card" style="display:none">
+            <p style="font-size:.88rem;font-weight:600;margin-bottom:12px">Pay via Debit/Credit Card</p>
+            <div class="form-group">
+              <label class="form-label">Card Number</label>
+              <input type="text" class="form-control" id="card-number" placeholder="1234 5678 9012 3456" maxlength="19" oninput="formatCard(this)">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Cardholder Name</label>
+              <input type="text" class="form-control" id="card-name" placeholder="Name on card">
+            </div>
+            <div class="card-row">
+              <div class="form-group">
+                <label class="form-label">Expiry Date</label>
+                <input type="text" class="form-control" id="card-expiry" placeholder="MM/YY" maxlength="5" oninput="formatExpiry(this)">
+              </div>
+              <div class="form-group">
+                <label class="form-label">CVV</label>
+                <input type="password" class="form-control" id="card-cvv" placeholder="•••" maxlength="3">
+              </div>
+            </div>
+          </div>
+
+          <!-- Net Banking Form -->
+          <div class="payment-form" id="payment-form-netbanking" style="display:none">
+            <p style="font-size:.88rem;font-weight:600;margin-bottom:12px">Select Your Bank</p>
+            <select class="form-control" id="bank-select">
+              <option>State Bank of India</option>
+              <option>HDFC Bank</option>
+              <option>ICICI Bank</option>
+              <option>Axis Bank</option>
+              <option>Kotak Mahindra Bank</option>
+              <option>Yes Bank</option>
+              <option>Punjab National Bank</option>
+              <option>Bank of Baroda</option>
+              <option>Other Bank</option>
+            </select>
+          </div>
+
+          <!-- COD Form -->
+          <div class="payment-form" id="payment-form-cod" style="display:none">
+            <div style="display:flex;gap:12px;align-items:flex-start">
+              <div style="font-size:2rem">💵</div>
+              <div>
+                <p style="font-weight:600;font-size:.92rem;margin-bottom:4px">Cash on Delivery</p>
+                <p style="font-size:.82rem;color:var(--text-light)">Pay in cash when your order is delivered. Additional ₹40 COD charge applies.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="secure-badges">
+            <i class="fas fa-lock" style="color:var(--green)"></i> SSL Secure
+            <span>•</span> <i class="fas fa-shield-alt" style="color:var(--green)"></i> 100% Safe
+            <span>•</span> <i class="fas fa-redo" style="color:var(--green)"></i> 7-Day Returns
+          </div>
+
+          <div style="display:flex;gap:12px;margin-top:8px">
+            <button class="btn btn-outline-dark" onclick="backToAddress()"><i class="fas fa-arrow-left"></i> Back</button>
+            <button class="btn btn-primary" style="flex:1" onclick="reviewOrder()">Review Order <i class="fas fa-arrow-right"></i></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3: REVIEW ORDER -->
+      <div id="checkout-step3" style="display:none">
+        <div class="checkout-section">
+          <h3><span>4</span> Review Your Order</h3>
+          <div id="review-address" style="background:var(--bg-cream);border-radius:var(--radius-sm);padding:16px;margin-bottom:16px">
+            <!-- Address display -->
+          </div>
+          <div id="review-items">
+            <!-- Order items display -->
+          </div>
+          <div style="display:flex;gap:12px;margin-top:20px">
+            <button class="btn btn-outline-dark" onclick="backToPayment()"><i class="fas fa-arrow-left"></i> Back</button>
+            <button class="btn btn-green" style="flex:1" id="place-order-btn" onclick="placeOrder()">
+              <i class="fas fa-lock"></i> Place Order & Pay
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: ORDER SUMMARY -->
+    <div>
+      <div class="order-summary-card">
+        <h3 style="font-family:var(--font-heading);font-size:1.1rem;margin-bottom:16px">Order Summary</h3>
+        <div id="summary-items">
+          <!-- Items rendered by JS -->
+        </div>
+        <hr class="divider">
+        <!-- Coupon -->
+        <div id="coupon-applied-badge2" class="coupon-applied" style="display:none;margin-bottom:12px">
+          <span class="coupon-text"></span>
+          <span style="cursor:pointer;color:var(--red)" onclick="removeSummaryCoupon()">✕</span>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:16px">
+          <input type="text" class="form-control" id="coupon-input2" placeholder="Coupon code" style="font-size:.85rem;text-transform:uppercase">
+          <button class="btn btn-outline-dark btn-sm" onclick="applySummaryCode()">Apply</button>
+        </div>
+        <div class="cart-summary-row"><span>Subtotal</span><span class="cart-subtotal">₹0</span></div>
+        <div class="cart-summary-row" style="color:var(--green)"><span>Discount</span><span class="cart-discount">₹0</span></div>
+        <div class="cart-summary-row"><span>Shipping</span><span class="cart-shipping">₹99</span></div>
+        <div class="cart-summary-row" id="cod-charge-row" style="display:none"><span>COD Charge</span><span>₹40</span></div>
+        <hr class="divider">
+        <div class="cart-summary-row total"><span>Total to Pay</span><span class="cart-total">₹0</span></div>
+        <div style="margin-top:14px;text-align:center">
+          <div style="font-size:.75rem;color:var(--text-light);margin-bottom:8px">You're saving <strong style="color:var(--green)" id="saving-amount">₹0</strong> on this order!</div>
+          <div style="display:flex;justify-content:center;gap:8px">
+            <i class="fab fa-cc-visa" style="font-size:1.6rem;color:#1A1F71"></i>
+            <i class="fab fa-cc-mastercard" style="font-size:1.6rem;color:#EB001B"></i>
+            <i class="fab fa-cc-amex" style="font-size:1.6rem;color:#2557D6"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/utils.js"></script>
+<script>
+let selectedPaymentMethod = 'upi';
+let checkoutData = {};
+
+function renderSummary() {
+  const items = Cart.getItems();
+  const el = document.getElementById('summary-items');
+  el.innerHTML = items.map(i => `
+    <div class="order-item">
+      <img src="${i.image}" alt="${i.name}" onerror="this.src='https://placehold.co/60/fdf5eb/c17c3c?text=NH'">
+      <div style="flex:1">
+        <div class="order-item-name">${i.name}</div>
+        <div style="font-size:.78rem;color:var(--text-light)">Qty: ${i.qty}</div>
+      </div>
+      <div class="order-item-price">${formatPrice(i.price * i.qty)}</div>
+    </div>`).join('');
+  updateCartTotals();
+  const subtotal = Cart.subtotal();
+  const coupon = Cart.getCoupon();
+  const disc = coupon ? coupon.discount : 0;
+  const saving = disc + items.reduce((s,i) => s + ((i.original_price||i.price)-i.price)*i.qty, 0);
+  document.getElementById('saving-amount').textContent = formatPrice(saving);
+  // Sync coupon badge
+  const cb = document.getElementById('coupon-applied-badge2');
+  if (coupon) { cb.style.display='flex'; cb.querySelector('.coupon-text').textContent=coupon.code+': -'+formatPrice(coupon.discount); }
+  else cb.style.display='none';
+}
+
+function selectPayment(el, method) {
+  document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedPaymentMethod = method;
+  document.querySelectorAll('.payment-form').forEach(f => f.style.display='none');
+  document.getElementById('payment-form-'+method).style.display='block';
+  const codRow = document.getElementById('cod-charge-row');
+  if (codRow) codRow.style.display = method === 'cod' ? 'flex' : 'none';
+}
+
+function verifyUPI() {
+  const upi = document.getElementById('upi-id').value;
+  if (!upi.includes('@')) { showToast('Enter valid UPI ID', 'error'); return; }
+  showToast('UPI ID verified! ✓', 'success');
+}
+
+function formatCard(el) {
+  let v = el.value.replace(/\D/g,'').substring(0,16);
+  el.value = v.replace(/(.{4})/g,'$1 ').trim();
+}
+function formatExpiry(el) {
+  let v = el.value.replace(/\D/g,'').substring(0,4);
+  if (v.length>2) v = v.substring(0,2)+'/'+v.substring(2);
+  el.value = v;
+}
+
+function goToPayment() {
+  const fname = document.getElementById('fname').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const addr1 = document.getElementById('addr1').value.trim();
+  const city = document.getElementById('city').value.trim();
+  const pincode = document.getElementById('pincode').value.trim();
+  const state = document.getElementById('state').value;
+  if (!fname||!email||!phone||!addr1||!city||!pincode||!state) {
+    showToast('Please fill all required fields', 'error'); return;
+  }
+  checkoutData.contact = { fname, lname: document.getElementById('lname').value, email, phone };
+  checkoutData.address = { addr1, addr2: document.getElementById('addr2').value, city, state, pincode };
+  document.getElementById('checkout-step1').style.display='none';
+  document.getElementById('checkout-step2').style.display='block';
+  updateStepUI(2);
+}
+
+function backToAddress() {
+  document.getElementById('checkout-step2').style.display='none';
+  document.getElementById('checkout-step1').style.display='block';
+  updateStepUI(1);
+}
+
+function reviewOrder() {
+  document.getElementById('checkout-step2').style.display='none';
+  document.getElementById('checkout-step3').style.display='block';
+  updateStepUI(3);
+  // Show address summary
+  const a = checkoutData.address;
+  const c = checkoutData.contact;
+  document.getElementById('review-address').innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div>
+        <p style="font-weight:600">${c.fname} ${c.lname}</p>
+        <p style="font-size:.85rem;color:var(--text-medium)">${a.addr1}${a.addr2?', '+a.addr2:''}</p>
+        <p style="font-size:.85rem;color:var(--text-medium)">${a.city}, ${a.state} – ${a.pincode}</p>
+        <p style="font-size:.85rem;color:var(--text-medium)">${c.phone} | ${c.email}</p>
+      </div>
+      <span style="font-size:.8rem;color:var(--primary);cursor:pointer" onclick="backToAddress()">Edit</span>
+    </div>
+    <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border-light)">
+      <span style="font-size:.82rem;font-weight:600">Payment: </span>
+      <span style="font-size:.82rem;color:var(--text-medium);text-transform:capitalize">${selectedPaymentMethod}</span>
+    </div>`;
+  const items = Cart.getItems();
+  document.getElementById('review-items').innerHTML = items.map(i => `
+    <div class="order-item">
+      <img src="${i.image}" alt="${i.name}" style="width:56px;height:56px;border-radius:8px;object-fit:cover" onerror="this.src='https://placehold.co/56/fdf5eb/c17c3c?text=NH'">
+      <div style="flex:1"><div style="font-size:.88rem;font-weight:600">${i.name}</div><div style="font-size:.78rem;color:var(--text-light)">Qty: ${i.qty}</div></div>
+      <div style="font-size:.88rem;font-weight:700;color:var(--primary)">${formatPrice(i.price*i.qty)}</div>
+    </div>`).join('');
+}
+
+function backToPayment() {
+  document.getElementById('checkout-step3').style.display='none';
+  document.getElementById('checkout-step2').style.display='block';
+  updateStepUI(2);
+}
+
+async function placeOrder() {
+  const items = Cart.getItems();
+  if (!items.length) { showToast('Your cart is empty', 'error'); return; }
+  const btn = document.getElementById('place-order-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+  const coupon = Cart.getCoupon();
+  const subtotal = Cart.subtotal();
+  const discount = coupon ? coupon.discount : 0;
+  const shipping = subtotal > 599 ? 0 : 99;
+  const codCharge = selectedPaymentMethod === 'cod' ? 40 : 0;
+  const total = subtotal - discount + shipping + codCharge;
+  const orderNumber = generateOrderNumber();
+  const { contact, address } = checkoutData;
+  try {
+    const order = await apiPost('orders', {
+      order_number: orderNumber,
+      user_email: contact.email,
+      user_name: contact.fname + ' ' + (contact.lname||''),
+      user_phone: contact.phone,
+      items: JSON.stringify(items),
+      subtotal, discount, shipping: shipping + codCharge, total,
+      status: 'confirmed',
+      payment_status: selectedPaymentMethod === 'cod' ? 'pending' : 'paid',
+      payment_method: selectedPaymentMethod,
+      payment_id: 'PAY_' + Date.now(),
+      shipping_address: JSON.stringify(address),
+      coupon_code: coupon?.code || '',
+      estimated_delivery: getEstimatedDelivery(),
+      tracking_number: 'TRK' + Date.now()
+    });
+    Cart.clear();
+    Cart.removeCoupon();
+    window.location.href = `order-confirmation.html?order=${orderNumber}&id=${order.id}`;
+  } catch(e) {
+    showToast('Error placing order. Please try again.', 'error');
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-lock"></i> Place Order & Pay';
+  }
+}
+
+function getEstimatedDelivery() {
+  const d = new Date();
+  d.setDate(d.getDate() + 5);
+  return d.toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long' });
+}
+
+function updateStepUI(step) {
+  for (let i = 1; i <= 4; i++) {
+    const dot = document.getElementById(`step${i}-dot`);
+    if (!dot) continue;
+    dot.className = 'step-dot';
+    if (i < step) dot.classList.add('done'), dot.innerHTML = '✓';
+    else if (i === step) dot.classList.add('active'), dot.innerHTML = i;
+    else dot.innerHTML = i;
+  }
+  for (let i = 1; i <= 3; i++) {
+    const line = document.getElementById(`line-${i}-${i+1}`);
+    if (line) line.className = 'step-line' + (i < step ? ' done' : '');
+  }
+}
+
+async function applySummaryCode() {
+  const code = document.getElementById('coupon-input2').value.trim();
+  const applied = await applyCoupon(code);
+  if (applied) renderSummary();
+}
+
+function removeSummaryCoupon() {
+  Cart.removeCoupon();
+  document.getElementById('coupon-applied-badge2').style.display = 'none';
+  renderSummary();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const items = Cart.getItems();
+  if (!items.length) { window.location.href = 'shop.html'; return; }
+  renderSummary();
+  updateStepUI(1);
+});
+</script>
+</body>
+</html>

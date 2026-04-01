@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Support – NatHerb</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+  <style>
+    .support-hero { background:linear-gradient(135deg,var(--bg-cream) 0%,#FFE4CC 100%); padding:50px 0; text-align:center; border-bottom:1px solid var(--border-light); }
+    .support-channels { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin:40px 0; }
+    .support-channel {
+      background:var(--white); border:1px solid var(--border-light); border-radius:var(--radius-lg);
+      padding:24px 20px; text-align:center; cursor:pointer; transition:var(--transition);
+    }
+    .support-channel:hover { box-shadow:var(--shadow-md); transform:translateY(-3px); border-color:var(--primary-light); }
+    .support-channel .icon { font-size:2.2rem; margin-bottom:12px; display:block; }
+    .support-channel h3 { font-size:1rem; font-weight:600; margin-bottom:4px; }
+    .support-channel p { font-size:.8rem; color:var(--text-light); }
+    .support-channel .availability { font-size:.75rem; color:var(--green); font-weight:600; margin-top:6px; }
+    /* FAQ */
+    .faq-item { border:1px solid var(--border-light); border-radius:var(--radius); overflow:hidden; margin-bottom:10px; }
+    .faq-question { padding:16px 20px; font-weight:600; font-size:.92rem; cursor:pointer; display:flex; align-items:center; justify-content:space-between; background:var(--white); transition:var(--transition); }
+    .faq-question:hover { background:var(--bg-cream); }
+    .faq-answer { padding:0 20px; max-height:0; overflow:hidden; transition:max-height .3s ease, padding .3s; font-size:.88rem; color:var(--text-medium); line-height:1.7; background:var(--bg-light); }
+    .faq-answer.open { max-height:300px; padding:14px 20px; }
+    /* Ticket form */
+    .ticket-form-card { background:var(--white); border:1px solid var(--border-light); border-radius:var(--radius-lg); padding:32px; }
+    /* Chat window */
+    .chat-window { display:none; position:fixed; bottom:24px; right:24px; width:360px; height:520px; background:var(--white); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); border:1px solid var(--border); z-index:9999; flex-direction:column; overflow:hidden; }
+    .chat-window.open { display:flex; }
+    .chat-header { background:var(--green); color:white; padding:16px 20px; display:flex; align-items:center; gap:12px; flex-shrink:0; }
+    .chat-header .agent { width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:1.1rem; }
+    .chat-messages { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:12px; background:var(--bg-cream); }
+    .chat-msg { max-width:80%; }
+    .chat-msg.agent { align-self:flex-start; }
+    .chat-msg.user { align-self:flex-end; }
+    .chat-bubble { padding:10px 14px; border-radius:16px; font-size:.87rem; line-height:1.5; }
+    .chat-msg.agent .chat-bubble { background:var(--white); color:var(--text-dark); border-bottom-left-radius:4px; box-shadow:var(--shadow-sm); }
+    .chat-msg.user .chat-bubble { background:var(--green); color:white; border-bottom-right-radius:4px; }
+    .chat-time { font-size:.68rem; color:var(--text-light); margin-top:3px; }
+    .chat-msg.user .chat-time { text-align:right; }
+    .chat-input-area { padding:12px 16px; border-top:1px solid var(--border-light); display:flex; gap:10px; align-items:center; flex-shrink:0; background:var(--white); }
+    .chat-input-area input { flex:1; border:1.5px solid var(--border); border-radius:var(--radius-full); padding:8px 14px; font-size:.88rem; outline:none; }
+    .chat-input-area input:focus { border-color:var(--green); }
+    .chat-send-btn { width:38px;height:38px;background:var(--green);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;font-size:1rem; }
+    .quick-replies { display:flex; gap:8px; flex-wrap:wrap; padding:8px 16px; background:var(--bg-cream); }
+    .quick-reply { background:var(--white); border:1px solid var(--border); border-radius:var(--radius-full); padding:5px 14px; font-size:.78rem; cursor:pointer; transition:var(--transition); }
+    .quick-reply:hover { border-color:var(--green); color:var(--green); }
+    @media(max-width:900px) { .support-channels{grid-template-columns:1fr 1fr} .chat-window{width:calc(100vw - 48px)} }
+    @media(max-width:600px) { .support-channels{grid-template-columns:1fr 1fr} .chat-window{width:calc(100vw - 32px);right:16px;bottom:16px} }
+  </style>
+</head>
+<body>
+
+<div class="announcement-bar">
+  <i class="fas fa-headset"></i> Support available Mon–Sat, 9AM–6PM IST
+</div>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="logo"><div><div class="logo-text">Nat<span>Herb</span></div><div class="logo-tagline">Fresh Ayurveda</div></div></a>
+    <nav class="main-nav">
+      <ul class="nav-list">
+        <li><a href="shop.html" class="nav-link">Shop</a></li>
+        <li><a href="account.html" class="nav-link">Account</a></li>
+        <li><a href="orders.html" class="nav-link">Orders</a></li>
+        <li><a href="support.html" class="nav-link active">Support</a></li>
+      </ul>
+    </nav>
+    <div class="header-actions">
+      <button class="header-action-btn" id="search-btn"><i class="fas fa-search"></i></button>
+      <a href="account.html" class="header-action-btn"><i class="far fa-user"></i></a>
+      <button class="header-action-btn" id="cart-btn"><i class="fas fa-shopping-bag"></i><span class="cart-count">0</span></button>
+    </div>
+  </div>
+</header>
+
+<div class="search-overlay" id="search-overlay"><div class="search-box"><div class="search-input-wrap"><i class="fas fa-search" style="color:var(--text-light)"></i><input type="text" id="search-input" placeholder="Search..."><button id="search-close-btn" style="color:var(--text-light)">✕</button></div><div id="search-results"></div></div></div>
+<div class="cart-overlay" id="cart-overlay"></div>
+<aside class="cart-sidebar" id="cart-sidebar">
+  <div class="cart-header"><h2><i class="fas fa-shopping-bag" style="color:var(--primary);margin-right:8px"></i>Cart</h2><button class="cart-close-btn" id="cart-close-btn"><i class="fas fa-times"></i></button></div>
+  <div class="cart-items" id="cart-items-list"></div>
+  <div class="cart-empty" id="cart-empty" style="display:none"><i class="fas fa-shopping-bag"></i><p>Cart is empty</p></div>
+  <div class="cart-footer"><div id="coupon-applied-badge" class="coupon-applied" style="display:none"><span class="coupon-text"></span><span class="coupon-remove" id="remove-coupon-btn">✕</span></div><div class="cart-coupon"><input type="text" id="coupon-input" placeholder="Coupon" style="text-transform:uppercase"><button class="btn btn-outline-dark btn-sm" id="apply-coupon-btn">Apply</button></div><div class="cart-summary-row total"><span>Total</span><span class="cart-total">₹0</span></div><a href="checkout.html" class="btn btn-primary btn-block" style="margin-top:14px" onclick="closeCart()"><i class="fas fa-lock"></i> Checkout</a></div>
+</aside>
+
+<!-- HERO -->
+<div class="support-hero">
+  <div class="container">
+    <div style="font-size:3rem;margin-bottom:16px">🌿</div>
+    <h1 style="font-family:var(--font-heading);font-size:2.2rem;margin-bottom:8px">How Can We Help You?</h1>
+    <p style="color:var(--text-light);font-size:1rem;max-width:500px;margin:0 auto 24px">We're here to make your NatHerb experience perfect. Reach out anytime.</p>
+    <div style="max-width:520px;margin:0 auto;display:flex;gap:0;border-radius:var(--radius-full);overflow:hidden;box-shadow:var(--shadow-md)">
+      <input type="text" id="support-search" placeholder="Search FAQs, topics..." class="form-control" style="border-radius:0;border:none;padding:13px 20px" oninput="filterFAQs(this.value)">
+      <button class="btn btn-primary" style="border-radius:0"><i class="fas fa-search"></i></button>
+    </div>
+  </div>
+</div>
+
+<div class="container" style="padding-top:40px;padding-bottom:80px">
+
+  <!-- CONTACT CHANNELS -->
+  <div class="support-channels">
+    <div class="support-channel" onclick="openChat()">
+      <span class="icon">💬</span>
+      <h3>Live Chat</h3>
+      <p>Chat with our support team instantly</p>
+      <div class="availability"><i class="fas fa-circle" style="font-size:.5rem"></i> Available now</div>
+    </div>
+    <div class="support-channel" onclick="window.open('https://wa.me/919999999999?text=Hi, I need help with my NatHerb order')">
+      <span class="icon">📱</span>
+      <h3>WhatsApp</h3>
+      <p>Message us on WhatsApp for quick help</p>
+      <div class="availability"><i class="fas fa-circle" style="font-size:.5rem"></i> 9AM – 9PM</div>
+    </div>
+    <div class="support-channel" onclick="window.location='mailto:support@natherb.com'">
+      <span class="icon">📧</span>
+      <h3>Email Us</h3>
+      <p>support@natherb.com</p>
+      <div class="availability">Response within 2 hours</div>
+    </div>
+    <div class="support-channel" onclick="window.location='tel:18001234567'">
+      <span class="icon">📞</span>
+      <h3>Call Us</h3>
+      <p>1800-123-4567 (Toll free)</p>
+      <div class="availability">Mon–Sat, 9AM–6PM</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px">
+    <!-- FAQ SECTION -->
+    <div>
+      <h2 style="font-family:var(--font-heading);font-size:1.6rem;margin-bottom:20px">Frequently Asked Questions</h2>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px" id="faq-categories">
+        <button class="btn btn-primary btn-sm" onclick="filterByCategory('all',this)">All</button>
+        <button class="btn btn-outline-dark btn-sm" onclick="filterByCategory('orders',this)">Orders</button>
+        <button class="btn btn-outline-dark btn-sm" onclick="filterByCategory('products',this)">Products</button>
+        <button class="btn btn-outline-dark btn-sm" onclick="filterByCategory('shipping',this)">Shipping</button>
+        <button class="btn btn-outline-dark btn-sm" onclick="filterByCategory('returns',this)">Returns</button>
+        <button class="btn btn-outline-dark btn-sm" onclick="filterByCategory('payment',this)">Payment</button>
+      </div>
+      <div id="faq-container">
+        <!-- FAQs rendered by JS -->
+      </div>
+    </div>
+
+    <!-- TICKET FORM -->
+    <div>
+      <h2 style="font-family:var(--font-heading);font-size:1.6rem;margin-bottom:20px">Raise a Support Ticket</h2>
+      <div class="ticket-form-card">
+        <div class="form-group">
+          <label class="form-label">Your Name *</label>
+          <input type="text" class="form-control" id="ticket-name" placeholder="Enter your name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address *</label>
+          <input type="email" class="form-control" id="ticket-email" placeholder="your@email.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Issue Category *</label>
+          <select class="form-control" id="ticket-category">
+            <option value="">Select category</option>
+            <option value="order">Order Related</option>
+            <option value="product">Product Query</option>
+            <option value="payment">Payment Issue</option>
+            <option value="shipping">Shipping & Delivery</option>
+            <option value="return">Return & Refund</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Order Number (if applicable)</label>
+          <input type="text" class="form-control" id="ticket-order" placeholder="e.g. NH12345678">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Subject *</label>
+          <input type="text" class="form-control" id="ticket-subject" placeholder="Brief description of your issue">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Message *</label>
+          <textarea class="form-control" id="ticket-message" placeholder="Describe your issue in detail..."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Priority</label>
+          <div style="display:flex;gap:10px">
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.88rem">
+              <input type="radio" name="priority" value="low" checked style="accent-color:var(--primary)"> Low
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.88rem">
+              <input type="radio" name="priority" value="medium" style="accent-color:var(--primary)"> Medium
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.88sm">
+              <input type="radio" name="priority" value="high" style="accent-color:var(--primary)"> High
+            </label>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-block" onclick="submitTicket()">
+          <i class="fas fa-paper-plane"></i> Submit Ticket
+        </button>
+        <p style="text-align:center;font-size:.78rem;color:var(--text-light);margin-top:10px">We typically respond within 2 business hours</p>
+      </div>
+
+      <!-- Ticket Status Check -->
+      <div style="margin-top:20px;background:var(--bg-cream);border-radius:var(--radius);padding:20px;border:1px solid var(--border-light)">
+        <h4 style="margin-bottom:12px;font-size:.95rem">Check Ticket Status</h4>
+        <div style="display:flex;gap:8px">
+          <input type="text" class="form-control" id="ticket-check-input" placeholder="Enter ticket number (e.g. TKT-123456)">
+          <button class="btn btn-outline-dark btn-sm" onclick="checkTicketStatus()">Check</button>
+        </div>
+        <div id="ticket-status-result" style="margin-top:10px;font-size:.85rem"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MY TICKETS -->
+  <div style="margin-top:50px">
+    <h2 style="font-family:var(--font-heading);font-size:1.6rem;margin-bottom:20px">My Support Tickets</h2>
+    <div id="my-tickets-list">
+      <p style="color:var(--text-light);font-size:.9rem;padding:20px 0">Sign in to view your tickets.</p>
+    </div>
+  </div>
+</div>
+
+<!-- LIVE CHAT WINDOW -->
+<div class="chat-window" id="chat-window">
+  <div class="chat-header">
+    <div class="agent">🌿</div>
+    <div>
+      <div style="font-weight:600;font-size:.95rem">NatHerb Support</div>
+      <div style="font-size:.75rem;opacity:.85"><span style="display:inline-block;width:7px;height:7px;background:#7FDF7F;border-radius:50%;margin-right:4px"></span>Online – Avg. reply: 2 min</div>
+    </div>
+    <button onclick="closeChat()" style="margin-left:auto;background:rgba(255,255,255,.2);border:none;color:white;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:1rem">✕</button>
+  </div>
+  <div class="chat-messages" id="chat-messages">
+    <!-- Messages rendered here -->
+  </div>
+  <div class="quick-replies" id="quick-replies">
+    <div class="quick-reply" onclick="sendQuickReply('Track my order')">📦 Track Order</div>
+    <div class="quick-reply" onclick="sendQuickReply('I have a return/refund query')">↩ Returns</div>
+    <div class="quick-reply" onclick="sendQuickReply('I have a product question')">❓ Product Help</div>
+    <div class="quick-reply" onclick="sendQuickReply('Payment issue')">💳 Payment</div>
+  </div>
+  <div class="chat-input-area">
+    <input type="text" id="chat-input" placeholder="Type your message..." onkeydown="if(event.key==='Enter')sendChatMessage()">
+    <button class="chat-send-btn" onclick="sendChatMessage()"><i class="fas fa-paper-plane"></i></button>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:30px;padding:40px 0;border-bottom:1px solid rgba(255,255,255,.1)">
+      <div>
+        <div class="logo-text" style="color:var(--bg-cream);font-size:1.6rem;margin-bottom:12px">Nat<span style="color:var(--green-light)">Herb</span></div>
+        <p style="font-size:.88rem;opacity:.7;line-height:1.7">Questions? We're always here to help. Your satisfaction is our priority.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div><h4 style="font-size:.9rem;font-weight:600;color:white;margin-bottom:12px">Quick Links</h4><ul style="display:flex;flex-direction:column;gap:8px"><li><a href="index.html" style="font-size:.83rem;opacity:.7">Home</a></li><li><a href="shop.html" style="font-size:.83rem;opacity:.7">Shop</a></li><li><a href="orders.html" style="font-size:.83rem;opacity:.7">Track Order</a></li></ul></div>
+        <div><h4 style="font-size:.9rem;font-weight:600;color:white;margin-bottom:12px">Policies</h4><ul style="display:flex;flex-direction:column;gap:8px"><li><a href="returns.html" style="font-size:.83rem;opacity:.7">Returns</a></li><li><a href="shipping.html" style="font-size:.83rem;opacity:.7">Shipping</a></li><li><a href="privacy.html" style="font-size:.83rem;opacity:.7">Privacy</a></li></ul></div>
+      </div>
+    </div>
+    <div class="footer-bottom" style="padding:20px 0"><span>© 2024 NatHerb.</span></div>
+  </div>
+</footer>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script src="js/utils.js"></script>
+<script>
+// ── FAQ DATA ──
+const FAQS = [
+  { q:'What payment methods do you accept?', a:'We accept UPI (GooglePay, PhonePe, Paytm), Credit/Debit Cards (Visa, Mastercard, Amex), Net Banking, and Cash on Delivery. All payments are secured with 256-bit SSL encryption.', cat:'payment' },
+  { q:'How long does delivery take?', a:'Standard delivery takes 3-5 business days across India. Express delivery (1-2 days) is available for select pin codes. We ship from our kitchen in Gurugram, Haryana.', cat:'shipping' },
+  { q:'Is free shipping available?', a:'Yes! We offer FREE shipping on all orders above ₹599. Orders below ₹599 are charged ₹99 for standard shipping. COD orders have an additional ₹40 charge.', cat:'shipping' },
+  { q:'What is the return policy?', a:'We accept returns within 7 days of delivery for unopened, unused products in original packaging. For products with quality issues, we also offer replacements or full refunds.', cat:'returns' },
+  { q:'How do I track my order?', a:'You can track your order on our Order Tracking page. Enter your order number (e.g., NH12345678) or email address. You\'ll also receive SMS and email updates.', cat:'orders' },
+  { q:'Can I cancel my order?', a:'Orders can be cancelled within 24 hours of placing them, as long as they haven\'t been dispatched. Go to My Orders and click "Cancel Order". Refunds are processed in 5-7 business days.', cat:'orders' },
+  { q:'Are your products 100% natural?', a:'Absolutely! All NatHerb products are made with 100% natural, Ayurvedic ingredients. Zero chemicals, parabens, SLS, silicones, or artificial fragrances. Everything is cruelty-free and vegan.', cat:'products' },
+  { q:'How fresh are the products?', a:'Our products are made fresh every day in our Ayurvedic kitchen. Each batch is prepared in small quantities to ensure maximum potency. Products have a shelf life of 3-6 months without preservatives.', cat:'products' },
+  { q:'How do I know which product is right for me?', a:'Take our free Skin & Hair Quiz to get personalized product recommendations. You can also reach out to our Ayurvedic experts via chat, WhatsApp, or email for personalized advice.', cat:'products' },
+  { q:'I received a damaged product. What should I do?', a:'We\'re sorry to hear that! Please raise a support ticket or contact us within 48 hours with photos of the damaged product. We\'ll send a replacement or full refund immediately.', cat:'orders' },
+  { q:'How long does a refund take?', a:'Refunds are processed within 5-7 business days after we receive the returned product. For payment failures, the amount is auto-reversed within 3-5 days.', cat:'payment' },
+  { q:'Can I modify my delivery address?', a:'Yes, address can be changed within 2 hours of order placement by contacting our support team. Once the order is dispatched, the address cannot be changed.', cat:'shipping' },
+];
+
+let activeFaqCat = 'all';
+
+function renderFAQs(faqs) {
+  document.getElementById('faq-container').innerHTML = faqs.map((f, i) => `
+    <div class="faq-item" data-cat="${f.cat}">
+      <div class="faq-question" onclick="toggleFAQ(this, ${i})">
+        ${f.q}
+        <i class="fas fa-chevron-down" style="font-size:.8rem;transition:transform .3s;color:var(--text-light)"></i>
+      </div>
+      <div class="faq-answer" id="faq-${i}">${f.a}</div>
+    </div>`).join('');
+}
+
+function toggleFAQ(el, idx) {
+  const ans = document.getElementById('faq-'+idx);
+  const icon = el.querySelector('i');
+  ans.classList.toggle('open');
+  icon.style.transform = ans.classList.contains('open') ? 'rotate(180deg)' : '';
+}
+
+function filterByCategory(cat, btn) {
+  activeFaqCat = cat;
+  document.querySelectorAll('#faq-categories button').forEach(b => {
+    b.className = 'btn btn-outline-dark btn-sm';
+  });
+  btn.className = 'btn btn-primary btn-sm';
+  const filtered = cat === 'all' ? FAQS : FAQS.filter(f => f.cat === cat);
+  renderFAQs(filtered);
+}
+
+function filterFAQs(query) {
+  const q = query.toLowerCase();
+  const filtered = FAQS.filter(f => f.q.toLowerCase().includes(q) || f.a.toLowerCase().includes(q));
+  renderFAQs(filtered);
+}
+
+// ── TICKET SUBMISSION ──
+async function submitTicket() {
+  const name = document.getElementById('ticket-name').value.trim();
+  const email = document.getElementById('ticket-email').value.trim();
+  const category = document.getElementById('ticket-category').value;
+  const subject = document.getElementById('ticket-subject').value.trim();
+  const message = document.getElementById('ticket-message').value.trim();
+  if (!name||!email||!category||!subject||!message) {
+    showToast('Please fill all required fields','error'); return;
+  }
+  const priority = document.querySelector('input[name="priority"]:checked')?.value || 'medium';
+  const ticketNumber = 'TKT-' + Date.now().toString().slice(-6);
+  try {
+    await apiPost('support_tickets', {
+      ticket_number: ticketNumber,
+      user_name: name,
+      user_email: email,
+      category,
+      subject,
+      message,
+      order_id: document.getElementById('ticket-order').value.trim(),
+      status: 'open',
+      priority
+    });
+    showToast(`Ticket ${ticketNumber} created! We'll respond within 2 hours. 🌿`, 'success', 5000);
+    document.getElementById('ticket-name').value = '';
+    document.getElementById('ticket-email').value = '';
+    document.getElementById('ticket-category').value = '';
+    document.getElementById('ticket-subject').value = '';
+    document.getElementById('ticket-message').value = '';
+  } catch { showToast('Error creating ticket. Please try again.','error'); }
+}
+
+async function checkTicketStatus() {
+  const input = document.getElementById('ticket-check-input').value.trim();
+  if (!input) return;
+  const el = document.getElementById('ticket-status-result');
+  el.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking...';
+  try {
+    const res = await apiGet('support_tickets', { search: input, limit: 5 });
+    const ticket = res.data?.find(t => t.ticket_number === input) || res.data?.[0];
+    if (!ticket) { el.innerHTML = '<span style="color:var(--red)">Ticket not found. Please check the number.</span>'; return; }
+    const statusColors = { open:'var(--primary)', in_progress:'var(--gold)', resolved:'var(--green)', closed:'var(--text-light)' };
+    el.innerHTML = `<div style="background:var(--white);border:1px solid var(--border-light);border-radius:var(--radius-sm);padding:12px">
+      <div style="font-weight:600">${ticket.ticket_number}</div>
+      <div style="color:var(--text-light);font-size:.8rem">${ticket.subject}</div>
+      <div style="margin-top:6px"><span style="color:${statusColors[ticket.status]||'var(--primary)'};font-weight:600;font-size:.85rem">● ${(ticket.status||'open').toUpperCase()}</span></div>
+      ${ticket.response ? `<div style="margin-top:8px;padding:8px;background:rgba(90,138,90,.05);border-radius:6px;font-size:.82rem;color:var(--text-medium)"><strong>Response:</strong> ${ticket.response}</div>` : ''}
+    </div>`;
+  } catch { el.innerHTML = '<span style="color:var(--red)">Error checking ticket status.</span>'; }
+}
+
+// ── CHAT ──
+let chatMessages = [];
+const BOT_RESPONSES = {
+  default: ['Our team will get back to you shortly! You can also check our FAQs for instant answers.', 'I\'ll connect you with our support specialist right away!', 'Thank you for reaching out! Our team is reviewing your message.'],
+  track: ['Please share your order number (e.g., NH12345678) and we\'ll get you the latest status!', 'You can also track directly at <a href="orders.html" style="color:var(--green)">orders.html</a>.'],
+  return: ['Returns are easy! Initiate a return request within 7 days of delivery. Would you like me to start the process?'],
+  payment: ['Payment issues are our top priority. Can you share your order number and what went wrong?'],
+  product: ['Our Ayurvedic experts would love to help! What would you like to know about our products?'],
+};
+
+function openChat() {
+  document.getElementById('chat-window').classList.add('open');
+  if (!chatMessages.length) {
+    addChatMessage('agent', '👋 Hi there! Welcome to NatHerb Support. I\'m here to help you with orders, products, returns, and anything else. How can I help?');
+  }
+}
+
+function closeChat() { document.getElementById('chat-window').classList.remove('open'); }
+
+function addChatMessage(type, text) {
+  const container = document.getElementById('chat-messages');
+  const now = new Date().toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' });
+  const msg = document.createElement('div');
+  msg.className = 'chat-msg ' + type;
+  msg.innerHTML = `<div class="chat-bubble">${text}</div><div class="chat-time">${now}</div>`;
+  container.appendChild(msg);
+  container.scrollTop = container.scrollHeight;
+  chatMessages.push({ type, text, time: now });
+}
+
+function sendChatMessage() {
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+  addChatMessage('user', msg);
+  input.value = '';
+  document.getElementById('quick-replies').style.display = 'none';
+  setTimeout(() => botReply(msg), 1000);
+}
+
+function sendQuickReply(msg) {
+  addChatMessage('user', msg);
+  document.getElementById('quick-replies').style.display = 'none';
+  setTimeout(() => botReply(msg), 800);
+}
+
+function botReply(userMsg) {
+  const msg = userMsg.toLowerCase();
+  let responses = BOT_RESPONSES.default;
+  if (msg.includes('track') || msg.includes('order') || msg.includes('status')) responses = BOT_RESPONSES.track;
+  else if (msg.includes('return') || msg.includes('refund')) responses = BOT_RESPONSES.return;
+  else if (msg.includes('payment') || msg.includes('pay')) responses = BOT_RESPONSES.payment;
+  else if (msg.includes('product') || msg.includes('ingredient') || msg.includes('natural')) responses = BOT_RESPONSES.product;
+  const reply = responses[Math.floor(Math.random() * responses.length)];
+  addChatMessage('agent', reply);
+}
+
+// Init
+renderFAQs(FAQS);
+
+// Load user tickets
+const user = Auth.getUser();
+if (user) {
+  apiGet('support_tickets', { search: user.email, limit: 10 }).then(res => {
+    const tickets = res.data || [];
+    if (tickets.length) {
+      const colors = { open:'var(--primary)', in_progress:'var(--gold)', resolved:'var(--green)', closed:'var(--text-light)' };
+      document.getElementById('my-tickets-list').innerHTML = tickets.map(t => `
+        <div style="background:var(--white);border:1px solid var(--border-light);border-radius:var(--radius);padding:16px;margin-bottom:10px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+          <div>
+            <div style="font-weight:600;font-size:.9rem">${t.ticket_number}</div>
+            <div style="font-size:.85rem;color:var(--text-medium);margin:3px 0">${t.subject}</div>
+            <div style="font-size:.75rem;color:var(--text-light)">${t.created_at ? formatDate(t.created_at) : 'Recent'}</div>
+          </div>
+          <span style="background:rgba(0,0,0,.05);padding:3px 10px;border-radius:20px;font-size:.75rem;font-weight:600;color:${colors[t.status]||'var(--primary)'};white-space:nowrap">${(t.status||'open').toUpperCase()}</span>
+        </div>`).join('');
+    }
+  }).catch(() => {});
+}
+
+// Pre-fill form if URL has type param
+const urlParams = new URLSearchParams(window.location.search);
+const supportType = urlParams.get('type');
+if (supportType) {
+  const catMap = { order:'order', product:'product', payment:'payment', shipping:'shipping', return:'return' };
+  const catEl = document.getElementById('ticket-category');
+  if (catEl && catMap[supportType]) catEl.value = catMap[supportType];
+}
+</script>
+</body>
+</html>

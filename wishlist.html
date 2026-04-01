@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Wishlist – NatHerb</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+</head>
+<body>
+<div class="announcement-bar"><i class="fas fa-heart" style="color:#ff6b6b"></i> <span>Your saved favourites are here!</span></div>
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="logo"><div><div class="logo-text">Nat<span>Herb</span></div><div class="logo-tagline">Fresh Ayurveda</div></div></a>
+    <nav class="main-nav"><ul class="nav-list"><li><a href="shop.html" class="nav-link">Shop</a></li><li><a href="account.html" class="nav-link">Account</a></li></ul></nav>
+    <div class="header-actions">
+      <button class="header-action-btn" id="search-btn"><i class="fas fa-search"></i></button>
+      <a href="wishlist.html" class="header-action-btn" style="color:var(--red)"><i class="fas fa-heart"></i></a>
+      <a href="account.html" class="header-action-btn"><i class="far fa-user"></i></a>
+      <button class="header-action-btn" id="cart-btn"><i class="fas fa-shopping-bag"></i><span class="cart-count">0</span></button>
+    </div>
+  </div>
+</header>
+<div class="search-overlay" id="search-overlay"><div class="search-box"><div class="search-input-wrap"><i class="fas fa-search" style="color:var(--text-light)"></i><input type="text" id="search-input" placeholder="Search products..."><button id="search-close-btn" style="color:var(--text-light)">✕</button></div><div id="search-results"></div></div></div>
+<div class="cart-overlay" id="cart-overlay"></div>
+<aside class="cart-sidebar" id="cart-sidebar">
+  <div class="cart-header"><h2><i class="fas fa-shopping-bag" style="color:var(--primary);margin-right:8px"></i>Cart</h2><button class="cart-close-btn" id="cart-close-btn"><i class="fas fa-times"></i></button></div>
+  <div class="cart-items" id="cart-items-list"></div>
+  <div class="cart-empty" id="cart-empty" style="display:none"><i class="fas fa-shopping-bag"></i><p>Cart is empty</p></div>
+  <div class="cart-footer"><div id="coupon-applied-badge" class="coupon-applied" style="display:none"><span class="coupon-text"></span><span class="coupon-remove" id="remove-coupon-btn">✕</span></div><div class="cart-coupon"><input type="text" id="coupon-input" placeholder="Coupon" style="text-transform:uppercase"><button class="btn btn-outline-dark btn-sm" id="apply-coupon-btn">Apply</button></div><div class="cart-summary-row total"><span>Total</span><span class="cart-total">₹0</span></div><a href="checkout.html" class="btn btn-primary btn-block" style="margin-top:14px" onclick="closeCart()"><i class="fas fa-lock"></i> Checkout</a></div>
+</aside>
+
+<div class="page-banner">
+  <div class="breadcrumb" style="justify-content:center"><a href="index.html">Home</a><span class="sep">/</span><span class="current">Wishlist</span></div>
+  <h1>My Wishlist ❤️</h1>
+  <p id="wish-count-header">0 items saved</p>
+</div>
+
+<div class="container" style="padding:40px 0 80px">
+  <div id="wishlist-empty" style="text-align:center;padding:80px 20px;display:none">
+    <div style="font-size:4rem;margin-bottom:20px">💔</div>
+    <h2 style="font-family:var(--font-heading);font-size:1.6rem;margin-bottom:8px">Your wishlist is empty</h2>
+    <p style="color:var(--text-light);margin-bottom:24px">Save your favourite products to find them easily later.</p>
+    <a href="shop.html" class="btn btn-primary">Browse Products</a>
+  </div>
+  <div id="wishlist-grid" class="products-grid"></div>
+  <div id="wishlist-actions" style="display:none;margin-top:28px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+    <button class="btn btn-primary" onclick="addAllToCart()"><i class="fas fa-shopping-bag"></i> Add All to Cart</button>
+    <button class="btn btn-outline-dark" onclick="clearWishlist()"><i class="fas fa-trash"></i> Clear Wishlist</button>
+  </div>
+</div>
+
+<footer class="site-footer"><div class="container"><div class="footer-bottom" style="border-top:1px solid rgba(255,255,255,.1);padding:20px 0"><span>© 2024 NatHerb.</span></div></div></footer>
+<div class="toast-container" id="toast-container"></div>
+<script src="js/utils.js"></script>
+<script>
+function renderWishlist() {
+  const items = Wishlist.get();
+  document.getElementById('wish-count-header').textContent = items.length + ' item' + (items.length !== 1 ? 's' : '') + ' saved';
+  if (!items.length) {
+    document.getElementById('wishlist-empty').style.display = 'block';
+    document.getElementById('wishlist-grid').innerHTML = '';
+    document.getElementById('wishlist-actions').style.display = 'none';
+    return;
+  }
+  document.getElementById('wishlist-empty').style.display = 'none';
+  document.getElementById('wishlist-actions').style.display = 'flex';
+  document.getElementById('wishlist-grid').innerHTML = items.map(p => renderProductCard({...p, featured:true})).join('');
+  updateWishlistUI();
+}
+function addAllToCart() {
+  const items = Wishlist.get();
+  items.forEach(p => Cart.add(p, 1));
+  openCart();
+  showToast(items.length + ' items added to cart!', 'success');
+}
+function clearWishlist() {
+  if (!confirm('Clear all wishlist items?')) return;
+  storage.remove('nh_wishlist');
+  updateWishlistUI();
+  renderWishlist();
+  showToast('Wishlist cleared');
+}
+renderWishlist();
+</script>
+</body>
+</html>

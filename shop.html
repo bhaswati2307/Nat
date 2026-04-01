@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop All Products – NatHerb</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+  <style>
+    .sort-bar {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 0; border-bottom:1px solid var(--border-light); margin-bottom:20px;
+    }
+    .sort-bar .result-count { font-size:0.88rem; color:var(--text-light); }
+    .sort-select {
+      border:1.5px solid var(--border); border-radius:var(--radius-sm);
+      padding:8px 14px; font-size:0.88rem; color:var(--text-dark); outline:none; cursor:pointer;
+      background:var(--white);
+    }
+    .mobile-filter-btn {
+      display:none;
+      background:var(--white); border:1.5px solid var(--border);
+      border-radius:var(--radius-sm); padding:8px 16px; font-size:0.88rem; cursor:pointer;
+    }
+    .pagination {
+      display:flex; align-items:center; justify-content:center; gap:8px; padding:30px 0;
+    }
+    .page-btn {
+      width:38px;height:38px; border-radius:var(--radius-sm);
+      display:flex;align-items:center;justify-content:center;
+      border:1.5px solid var(--border); cursor:pointer; font-size:0.9rem; transition:var(--transition);
+    }
+    .page-btn.active { background:var(--primary);color:white;border-color:var(--primary); }
+    .page-btn:hover:not(.active) { border-color:var(--primary);color:var(--primary); }
+    .active-filters { display:flex; gap:8px; flex-wrap:wrap; padding:10px 0; }
+    .active-filter-tag {
+      background:rgba(193,124,60,.1);border:1px solid var(--primary-light);
+      color:var(--primary); font-size:.8rem; padding:4px 10px; border-radius:20px;
+      display:flex;align-items:center;gap:6px;
+    }
+    .active-filter-tag span { cursor:pointer; font-size:.9rem; }
+    @media(max-width:900px){.shop-layout{grid-template-columns:1fr}.filter-sidebar{display:none}.mobile-filter-btn{display:flex !important;align-items:center;gap:8px}}
+  </style>
+</head>
+<body>
+
+<!-- ANNOUNCEMENT BAR -->
+<div class="announcement-bar">
+  <i class="fas fa-gift"></i>
+  <span>Extra <strong>Rs.250 OFF</strong> on 1st Order | Code:</span>
+  <span class="coupon-code" onclick="navigator.clipboard.writeText('NEWHABIT250');showToast('Copied!','success')">NEWHABIT250</span>
+</div>
+
+<!-- HEADER (same as index) -->
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="logo">
+      <div><div class="logo-text">Nat<span>Herb</span></div><div class="logo-tagline">Fresh Ayurveda</div></div>
+    </a>
+    <nav class="main-nav">
+      <ul class="nav-list">
+        <li class="nav-item"><a href="shop.html?category=trending" class="nav-link">🔥 Trending</a></li>
+        <li class="nav-item">
+          <a href="shop.html?category=hair" class="nav-link">Hair <i class="fas fa-chevron-down" style="font-size:.7rem"></i></a>
+          <div class="nav-dropdown">
+            <a href="shop.html?category=hair&sub=shampoos">Shampoos</a>
+            <a href="shop.html?category=hair&sub=hair-oils">Hair Oils</a>
+            <a href="shop.html?category=hair&sub=hair-masks">Hair Masks</a>
+            <a href="shop.html?category=hair&sub=serums">Serums & Sprays</a>
+            <a href="shop.html?category=hair&sub=hair-color">Hair Color</a>
+          </div>
+        </li>
+        <li class="nav-item">
+          <a href="shop.html?category=face" class="nav-link">Face <i class="fas fa-chevron-down" style="font-size:.7rem"></i></a>
+          <div class="nav-dropdown">
+            <a href="shop.html?category=face&sub=cleansers">Face Wash</a>
+            <a href="shop.html?category=face&sub=moisturisers">Moisturisers</a>
+            <a href="shop.html?category=face&sub=serums">Serums</a>
+            <a href="shop.html?category=face&sub=face-packs">Face Packs</a>
+          </div>
+        </li>
+        <li class="nav-item"><a href="shop.html?category=body" class="nav-link">Body</a></li>
+        <li class="nav-item"><a href="shop.html" class="nav-link active">All Products</a></li>
+        <li class="nav-item"><a href="shop.html?tag=new_launch" class="nav-link" style="color:var(--green)">New Launches</a></li>
+      </ul>
+    </nav>
+    <div class="header-actions">
+      <button class="header-action-btn" id="search-btn"><i class="fas fa-search"></i></button>
+      <a href="wishlist.html" class="header-action-btn"><i class="far fa-heart"></i><span class="wishlist-count">0</span></a>
+      <a href="account.html" class="header-action-btn"><i class="far fa-user"></i></a>
+      <button class="header-action-btn" id="cart-btn"><i class="fas fa-shopping-bag"></i><span class="cart-count">0</span></button>
+      <div class="header-hamburger" id="hamburger-btn" style="display:none"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+</header>
+
+<!-- Mobile menu, search, cart (reuse) -->
+<div id="mobile-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9998;display:none"></div>
+<div class="mobile-menu" id="mobile-menu">
+  <span class="mobile-nav-close" id="mobile-menu-close">✕</span>
+  <a href="shop.html" class="mobile-nav-link">All Products</a>
+  <a href="shop.html?category=hair" class="mobile-nav-link">Hair</a>
+  <a href="shop.html?category=face" class="mobile-nav-link">Face</a>
+  <a href="shop.html?category=body" class="mobile-nav-link">Body</a>
+  <a href="account.html" class="mobile-nav-link">Account</a>
+</div>
+<div class="search-overlay" id="search-overlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <i class="fas fa-search" style="color:var(--text-light)"></i>
+      <input type="text" id="search-input" placeholder="Search products...">
+      <button id="search-close-btn" style="color:var(--text-light)">✕</button>
+    </div>
+    <div id="search-results"></div>
+  </div>
+</div>
+<div class="cart-overlay" id="cart-overlay"></div>
+<aside class="cart-sidebar" id="cart-sidebar">
+  <div class="cart-header"><h2><i class="fas fa-shopping-bag" style="color:var(--primary);margin-right:8px"></i>Your Cart</h2><button class="cart-close-btn" id="cart-close-btn"><i class="fas fa-times"></i></button></div>
+  <div class="cart-items" id="cart-items-list"></div>
+  <div class="cart-empty" id="cart-empty" style="display:none"><i class="fas fa-shopping-bag"></i><p style="font-weight:600;margin-bottom:8px">Your cart is empty</p><a href="shop.html" class="btn btn-primary btn-sm" onclick="closeCart()">Shop Now</a></div>
+  <div class="cart-footer">
+    <div id="coupon-applied-badge" class="coupon-applied" style="display:none"><span class="coupon-text"></span><span class="coupon-remove" id="remove-coupon-btn">✕</span></div>
+    <div class="cart-coupon"><input type="text" id="coupon-input" placeholder="Coupon code" style="text-transform:uppercase"><button class="btn btn-outline-dark btn-sm" id="apply-coupon-btn">Apply</button></div>
+    <div class="cart-summary-row"><span>Subtotal</span><span class="cart-subtotal">₹0</span></div>
+    <div class="cart-summary-row" style="color:var(--green)"><span>Discount</span><span class="cart-discount">₹0</span></div>
+    <div class="cart-summary-row"><span>Shipping</span><span class="cart-shipping">₹99</span></div>
+    <div class="cart-summary-row total"><span>Total</span><span class="cart-total">₹0</span></div>
+    <a href="checkout.html" class="btn btn-primary btn-block" style="margin-top:14px" onclick="closeCart()"><i class="fas fa-lock"></i> Checkout</a>
+  </div>
+</aside>
+
+<!-- PAGE HEADER -->
+<div class="page-banner" id="page-banner">
+  <div class="breadcrumb" style="justify-content:center">
+    <a href="index.html">Home</a><span class="sep">/</span>
+    <span class="current" id="breadcrumb-current">All Products</span>
+  </div>
+  <h1 id="page-title">All Products</h1>
+  <p id="page-subtitle">Discover our complete range of Fresh Ayurvedic products</p>
+</div>
+
+<div class="container" style="padding-top:30px;padding-bottom:60px">
+  <div class="shop-layout">
+    <!-- FILTER SIDEBAR -->
+    <aside class="filter-sidebar">
+      <div style="font-weight:700;font-size:1rem;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between">
+        Filters
+        <button onclick="clearFilters()" style="font-size:0.8rem;color:var(--primary);font-weight:500">Clear All</button>
+      </div>
+      <!-- Category -->
+      <div class="filter-section">
+        <div class="filter-section-header" onclick="toggleFilter(this)">Category <i class="fas fa-chevron-down"></i></div>
+        <div class="filter-section-body">
+          <label class="filter-option"><input type="checkbox" name="category" value="hair" onchange="applyFilters()"> Hair Care</label>
+          <label class="filter-option"><input type="checkbox" name="category" value="face" onchange="applyFilters()"> Face Care</label>
+          <label class="filter-option"><input type="checkbox" name="category" value="body" onchange="applyFilters()"> Body Care</label>
+        </div>
+      </div>
+      <!-- Price Range -->
+      <div class="filter-section">
+        <div class="filter-section-header" onclick="toggleFilter(this)">Price Range <i class="fas fa-chevron-down"></i></div>
+        <div class="filter-section-body">
+          <label class="filter-option"><input type="checkbox" name="price" value="0-299" onchange="applyFilters()"> Under ₹300</label>
+          <label class="filter-option"><input type="checkbox" name="price" value="300-499" onchange="applyFilters()"> ₹300 – ₹499</label>
+          <label class="filter-option"><input type="checkbox" name="price" value="500-999" onchange="applyFilters()"> ₹500 – ₹999</label>
+          <label class="filter-option"><input type="checkbox" name="price" value="1000-99999" onchange="applyFilters()"> Above ₹1000</label>
+        </div>
+      </div>
+      <!-- Badge -->
+      <div class="filter-section">
+        <div class="filter-section-header" onclick="toggleFilter(this)">Product Type <i class="fas fa-chevron-down"></i></div>
+        <div class="filter-section-body">
+          <label class="filter-option"><input type="checkbox" name="badge" value="BEST SELLER" onchange="applyFilters()"> Best Sellers</label>
+          <label class="filter-option"><input type="checkbox" name="badge" value="NEW LAUNCH" onchange="applyFilters()"> New Launches</label>
+          <label class="filter-option"><input type="checkbox" name="badge" value="AWARD WINNER" onchange="applyFilters()"> Award Winners</label>
+        </div>
+      </div>
+      <!-- Rating -->
+      <div class="filter-section">
+        <div class="filter-section-header" onclick="toggleFilter(this)">Rating <i class="fas fa-chevron-down"></i></div>
+        <div class="filter-section-body">
+          <label class="filter-option"><input type="checkbox" name="rating" value="4.5" onchange="applyFilters()"> ★ 4.5 & above</label>
+          <label class="filter-option"><input type="checkbox" name="rating" value="4.0" onchange="applyFilters()"> ★ 4.0 & above</label>
+        </div>
+      </div>
+    </aside>
+
+    <!-- PRODUCTS MAIN -->
+    <div class="products-main">
+      <div class="sort-bar">
+        <div>
+          <span class="result-count" id="result-count">Loading...</span>
+          <div class="active-filters" id="active-filters"></div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <button class="mobile-filter-btn" onclick="toggleMobileFilters()"><i class="fas fa-filter"></i> Filters</button>
+          <select class="sort-select" id="sort-select" onchange="applyFilters()">
+            <option value="">Sort: Featured</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+            <option value="rating">Best Rated</option>
+            <option value="reviews">Most Reviewed</option>
+            <option value="discount">Best Discount</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="products-grid" id="products-grid">
+        <!-- Products rendered by JS -->
+        <div class="skeleton" style="height:350px;border-radius:12px"></div>
+        <div class="skeleton" style="height:350px;border-radius:12px"></div>
+        <div class="skeleton" style="height:350px;border-radius:12px"></div>
+        <div class="skeleton" style="height:350px;border-radius:12px"></div>
+        <div class="skeleton" style="height:350px;border-radius:12px"></div>
+        <div class="skeleton" style="height:350px;border-radius:12px"></div>
+      </div>
+
+      <div class="pagination" id="pagination"></div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-bottom" style="border-top:1px solid rgba(255,255,255,0.1);padding:20px 0">
+      <span>© 2024 NatHerb. All rights reserved.</span>
+      <div style="display:flex;gap:16px;font-size:0.8rem"><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a></div>
+      <div class="footer-payments"><span class="payment-icon">UPI</span><span class="payment-icon">Cards</span><span class="payment-icon">NetBanking</span><span class="payment-icon">COD</span></div>
+    </div>
+  </div>
+</footer>
+
+<!-- SUPPORT WIDGET -->
+<div class="support-widget">
+  <div class="support-panel" id="support-panel">
+    <div class="support-panel-header">
+      <div style="width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:1.2rem">🌿</div>
+      <div><h3>NatHerb Support</h3><p>We're here to help!</p></div>
+    </div>
+    <div class="support-options">
+      <div class="support-option" onclick="window.location='support.html'"><i class="fas fa-headset"></i><div><div class="opt-title">Get Help</div><div class="opt-sub">Contact our support team</div></div></div>
+    </div>
+  </div>
+  <button class="support-toggle" id="support-toggle"><i class="fas fa-headset"></i></button>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script src="js/utils.js"></script>
+<script>
+let allProducts = [];
+let filteredProducts = [];
+let currentPage = 1;
+const perPage = 12;
+const params = new URLSearchParams(window.location.search);
+
+async function loadProducts() {
+  try {
+    const res = await apiGet('products', { limit: 100 });
+    allProducts = res.data || [];
+    applyFilters();
+    initPageFromURL();
+  } catch(e) {
+    document.getElementById('products-grid').innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--text-light);padding:60px">Failed to load products. Please refresh.</p>';
+  }
+}
+
+function initPageFromURL() {
+  const category = params.get('category');
+  const sub = params.get('sub');
+  const tag = params.get('tag');
+  const search = params.get('search');
+  if (category) {
+    const titles = { hair:'Hair Care', face:'Face Care', body:'Body Care', trending:'Trending Products' };
+    document.getElementById('page-title').textContent = titles[category] || category;
+    document.getElementById('breadcrumb-current').textContent = titles[category] || category;
+    const cb = document.querySelector(`input[name="category"][value="${category}"]`);
+    if (cb) cb.checked = true;
+  }
+  if (tag === 'new_launch') {
+    document.getElementById('page-title').textContent = 'New Launches';
+    document.getElementById('breadcrumb-current').textContent = 'New Launches';
+  }
+  if (search) {
+    document.getElementById('page-title').textContent = `Search: "${search}"`;
+    document.getElementById('breadcrumb-current').textContent = 'Search Results';
+  }
+  applyFilters();
+}
+
+function applyFilters() {
+  const categories = [...document.querySelectorAll('input[name="category"]:checked')].map(i => i.value);
+  const prices = [...document.querySelectorAll('input[name="price"]:checked')].map(i => i.value);
+  const badges = [...document.querySelectorAll('input[name="badge"]:checked')].map(i => i.value);
+  const ratings = [...document.querySelectorAll('input[name="rating"]:checked')].map(i => parseFloat(i.value));
+  const sortVal = document.getElementById('sort-select')?.value || '';
+  const urlCategory = params.get('category');
+  const urlTag = params.get('tag');
+  const urlSearch = params.get('search');
+  const concern = params.get('concern');
+
+  filteredProducts = allProducts.filter(p => {
+    if (urlCategory && urlCategory !== 'trending' && p.category !== urlCategory) return false;
+    if (urlTag === 'new_launch' && !p.new_launch) return false;
+    if (urlSearch && !p.name.toLowerCase().includes(urlSearch.toLowerCase()) && !p.short_desc?.toLowerCase().includes(urlSearch.toLowerCase())) return false;
+    if (urlCategory === 'trending' && !p.featured) return false;
+    if (categories.length && !categories.includes(p.category)) return false;
+    if (badges.length && !badges.includes(p.badge)) return false;
+    if (ratings.length && p.rating < Math.min(...ratings)) return false;
+    if (prices.length) {
+      const inRange = prices.some(range => {
+        const [min, max] = range.split('-').map(Number);
+        return p.price >= min && p.price <= max;
+      });
+      if (!inRange) return false;
+    }
+    return true;
+  });
+
+  // Sort
+  if (sortVal === 'price-asc') filteredProducts.sort((a,b) => a.price - b.price);
+  else if (sortVal === 'price-desc') filteredProducts.sort((a,b) => b.price - a.price);
+  else if (sortVal === 'rating') filteredProducts.sort((a,b) => b.rating - a.rating);
+  else if (sortVal === 'reviews') filteredProducts.sort((a,b) => b.reviews_count - a.reviews_count);
+  else if (sortVal === 'discount') filteredProducts.sort((a,b) => getDiscount(b.original_price,b.price) - getDiscount(a.original_price,a.price));
+
+  currentPage = 1;
+  renderProducts();
+  renderPagination();
+  updateActiveFilters(categories, prices, badges);
+}
+
+function renderProducts() {
+  const grid = document.getElementById('products-grid');
+  const start = (currentPage - 1) * perPage;
+  const page = filteredProducts.slice(start, start + perPage);
+  document.getElementById('result-count').textContent = `${filteredProducts.length} product${filteredProducts.length !== 1 ? 's' : ''}`;
+  if (!page.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:80px 20px;color:var(--text-light)">
+      <div style="font-size:3rem;margin-bottom:16px">🔍</div>
+      <div style="font-weight:600;font-size:1.1rem;margin-bottom:8px">No products found</div>
+      <div style="font-size:.9rem;margin-bottom:20px">Try removing some filters</div>
+      <button onclick="clearFilters()" class="btn btn-outline-dark btn-sm">Clear Filters</button>
+    </div>`;
+    return;
+  }
+  grid.innerHTML = page.map(renderProductCard).join('');
+  updateWishlistUI();
+}
+
+function renderPagination() {
+  const totalPages = Math.ceil(filteredProducts.length / perPage);
+  const pg = document.getElementById('pagination');
+  if (totalPages <= 1) { pg.innerHTML = ''; return; }
+  let html = '';
+  if (currentPage > 1) html += `<button class="page-btn" onclick="goToPage(${currentPage-1})"><i class="fas fa-chevron-left"></i></button>`;
+  for (let i = 1; i <= totalPages; i++) {
+    if (i === currentPage) html += `<button class="page-btn active">${i}</button>`;
+    else if (Math.abs(i - currentPage) <= 2 || i === 1 || i === totalPages) html += `<button class="page-btn" onclick="goToPage(${i})">${i}</button>`;
+    else if (Math.abs(i - currentPage) === 3) html += `<span style="padding:0 4px;color:var(--text-light)">…</span>`;
+  }
+  if (currentPage < totalPages) html += `<button class="page-btn" onclick="goToPage(${currentPage+1})"><i class="fas fa-chevron-right"></i></button>`;
+  pg.innerHTML = html;
+}
+
+function goToPage(n) { currentPage = n; renderProducts(); renderPagination(); window.scrollTo({top:400,behavior:'smooth'}); }
+
+function updateActiveFilters(categories, prices, badges) {
+  const el = document.getElementById('active-filters');
+  const tags = [...categories.map(c => ({label:c,type:'category',val:c})), ...badges.map(b => ({label:b,type:'badge',val:b}))];
+  el.innerHTML = tags.map(t => `<div class="active-filter-tag">${t.label}<span onclick="removeFilter('${t.type}','${t.val}')">✕</span></div>`).join('');
+}
+
+function removeFilter(type, val) {
+  const cb = document.querySelector(`input[name="${type}"][value="${val}"]`);
+  if (cb) { cb.checked = false; applyFilters(); }
+}
+
+function clearFilters() {
+  document.querySelectorAll('.filter-section input').forEach(i => i.checked = false);
+  document.getElementById('sort-select').value = '';
+  applyFilters();
+}
+
+function toggleFilter(header) {
+  const body = header.nextElementSibling;
+  body.style.display = body.style.display === 'none' ? '' : 'none';
+  const icon = header.querySelector('i');
+  if (icon) icon.className = body.style.display === 'none' ? 'fas fa-chevron-right' : 'fas fa-chevron-down';
+}
+
+function toggleMobileFilters() {
+  const sidebar = document.querySelector('.filter-sidebar');
+  sidebar.style.display = sidebar.style.display === 'block' ? 'none' : 'block';
+}
+
+loadProducts();
+</script>
+</body>
+</html>

@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Account – NatHerb</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+  <style>
+    .account-layout { display:grid; grid-template-columns:260px 1fr; gap:30px; padding:40px 0 80px; }
+    .account-sidebar { background:var(--white); border:1px solid var(--border-light); border-radius:var(--radius-lg); padding:24px; height:fit-content; position:sticky; top:90px; }
+    .account-avatar { width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-dark));display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:white;font-family:var(--font-heading);font-weight:700;margin:0 auto 14px; }
+    .account-name { text-align:center;font-weight:700;font-size:1.05rem; }
+    .account-email { text-align:center;font-size:.8rem;color:var(--text-light);margin-bottom:20px; }
+    .account-nav a { display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:var(--radius-sm);font-size:.9rem;font-weight:500;color:var(--text-medium);transition:var(--transition);margin-bottom:4px; }
+    .account-nav a:hover { background:var(--bg-cream);color:var(--primary); }
+    .account-nav a.active { background:rgba(193,124,60,.1);color:var(--primary);font-weight:600; }
+    .account-nav a i { width:20px;text-align:center;font-size:.9rem; }
+    .points-badge { background:linear-gradient(135deg,var(--gold),#B8860B);color:white;padding:8px 14px;border-radius:var(--radius-sm);text-align:center;margin-top:16px; }
+    .points-badge .pts { font-size:1.4rem;font-weight:700; }
+    .points-badge .lbl { font-size:.75rem;opacity:.9; }
+    /* Auth Forms */
+    .auth-container { max-width:480px;margin:0 auto; }
+    .auth-tabs { display:flex;border-bottom:2px solid var(--border-light);margin-bottom:28px; }
+    .auth-tab { flex:1;padding:12px;text-align:center;font-weight:600;font-size:.95rem;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:var(--transition);color:var(--text-light); }
+    .auth-tab.active { color:var(--primary);border-bottom-color:var(--primary); }
+    .social-login { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px; }
+    .social-login-btn { border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:10px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;font-size:.88rem;font-weight:500;transition:var(--transition); }
+    .social-login-btn:hover { border-color:var(--primary);background:var(--bg-cream); }
+    .divider-text { text-align:center;position:relative;margin:16px 0; }
+    .divider-text::before { content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:var(--border-light); }
+    .divider-text span { background:var(--white);padding:0 12px;font-size:.82rem;color:var(--text-light);position:relative; }
+    /* Dashboard panels */
+    .dashboard-card { background:var(--white);border:1px solid var(--border-light);border-radius:var(--radius-lg);padding:24px;margin-bottom:20px; }
+    .dashboard-card h3 { font-family:var(--font-heading);font-size:1.1rem;margin-bottom:16px;display:flex;align-items:center;gap:8px; }
+    .stat-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px; }
+    .stat-card { background:var(--bg-cream);border-radius:var(--radius);padding:16px;text-align:center; }
+    .stat-card .val { font-size:1.6rem;font-weight:700;font-family:var(--font-heading);color:var(--primary); }
+    .stat-card .lbl { font-size:.78rem;color:var(--text-light);margin-top:2px; }
+    .order-row { display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--border-light);cursor:pointer;transition:var(--transition); }
+    .order-row:hover { background:var(--bg-cream);margin:0 -12px;padding:14px 12px;border-radius:var(--radius-sm); }
+    .order-row:last-child { border-bottom:none; }
+    .order-status-badge { padding:3px 10px;border-radius:var(--radius-full);font-size:.75rem;font-weight:600; }
+    .status-confirmed { background:rgba(74,144,226,.1);color:#4A90E2; }
+    .status-processing { background:rgba(193,124,60,.1);color:var(--primary); }
+    .status-shipped { background:rgba(212,175,55,.1);color:#B8860B; }
+    .status-delivered { background:rgba(90,138,90,.1);color:var(--green); }
+    .status-cancelled { background:rgba(224,92,92,.1);color:var(--red); }
+    @media(max-width:900px){.account-layout{grid-template-columns:1fr}.account-sidebar{position:static}}
+    @media(max-width:600px){.stat-grid{grid-template-columns:1fr 1fr}}
+  </style>
+</head>
+<body>
+
+<div class="announcement-bar">
+  <i class="fas fa-gift"></i>
+  <span>Extra <strong>Rs.250 OFF</strong> | Code: <span class="coupon-code" onclick="navigator.clipboard.writeText('NEWHABIT250');showToast('Copied!','success')">NEWHABIT250</span></span>
+</div>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="logo"><div><div class="logo-text">Nat<span>Herb</span></div><div class="logo-tagline">Fresh Ayurveda</div></div></a>
+    <nav class="main-nav">
+      <ul class="nav-list">
+        <li><a href="shop.html?category=hair" class="nav-link">Hair</a></li>
+        <li><a href="shop.html?category=face" class="nav-link">Face</a></li>
+        <li><a href="shop.html" class="nav-link">All Products</a></li>
+      </ul>
+    </nav>
+    <div class="header-actions">
+      <button class="header-action-btn" id="search-btn"><i class="fas fa-search"></i></button>
+      <a href="wishlist.html" class="header-action-btn"><i class="far fa-heart"></i><span class="wishlist-count">0</span></a>
+      <a href="account.html" class="header-action-btn" style="color:var(--primary)"><i class="fas fa-user"></i></a>
+      <button class="header-action-btn" id="cart-btn"><i class="fas fa-shopping-bag"></i><span class="cart-count">0</span></button>
+    </div>
+  </div>
+</header>
+
+<div class="search-overlay" id="search-overlay">
+  <div class="search-box"><div class="search-input-wrap"><i class="fas fa-search" style="color:var(--text-light)"></i><input type="text" id="search-input" placeholder="Search products..."><button id="search-close-btn" style="color:var(--text-light)">✕</button></div><div id="search-results"></div></div>
+</div>
+<div class="cart-overlay" id="cart-overlay"></div>
+<aside class="cart-sidebar" id="cart-sidebar">
+  <div class="cart-header"><h2><i class="fas fa-shopping-bag" style="color:var(--primary);margin-right:8px"></i>Your Cart</h2><button class="cart-close-btn" id="cart-close-btn"><i class="fas fa-times"></i></button></div>
+  <div class="cart-items" id="cart-items-list"></div>
+  <div class="cart-empty" id="cart-empty" style="display:none"><i class="fas fa-shopping-bag"></i><p>Your cart is empty</p></div>
+  <div class="cart-footer">
+    <div id="coupon-applied-badge" class="coupon-applied" style="display:none"><span class="coupon-text"></span><span class="coupon-remove" id="remove-coupon-btn">✕</span></div>
+    <div class="cart-coupon"><input type="text" id="coupon-input" placeholder="Coupon code" style="text-transform:uppercase"><button class="btn btn-outline-dark btn-sm" id="apply-coupon-btn">Apply</button></div>
+    <div class="cart-summary-row"><span>Subtotal</span><span class="cart-subtotal">₹0</span></div>
+    <div class="cart-summary-row total"><span>Total</span><span class="cart-total">₹0</span></div>
+    <a href="checkout.html" class="btn btn-primary btn-block" style="margin-top:14px" onclick="closeCart()"><i class="fas fa-lock"></i> Checkout</a>
+  </div>
+</aside>
+
+<div class="page-banner">
+  <h1>My Account</h1>
+  <p>Manage your profile, orders and preferences</p>
+</div>
+
+<div class="container">
+  <!-- AUTH SECTION (shown when not logged in) -->
+  <div id="auth-section" style="padding:60px 0">
+    <div class="auth-container">
+      <div class="auth-tabs">
+        <div class="auth-tab active" onclick="switchAuthTab('login')">Sign In</div>
+        <div class="auth-tab" onclick="switchAuthTab('register')">Create Account</div>
+      </div>
+
+      <!-- LOGIN -->
+      <div id="login-form">
+        <div class="social-login">
+          <div class="social-login-btn" onclick="showToast('Google login coming soon!','info')">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/24px-Google_%22G%22_logo.svg.png"> Google
+          </div>
+          <div class="social-login-btn" onclick="showToast('Facebook login coming soon!','info')">
+            <i class="fab fa-facebook" style="color:#1877F2"></i> Facebook
+          </div>
+        </div>
+        <div class="divider-text"><span>or sign in with email</span></div>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" class="form-control" id="login-email" placeholder="your@email.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password <a href="#" style="float:right;font-size:.8rem;color:var(--primary)">Forgot password?</a></label>
+          <div style="position:relative">
+            <input type="password" class="form-control" id="login-password" placeholder="Enter your password">
+            <button type="button" onclick="togglePwd('login-password')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--text-light)"><i class="fas fa-eye"></i></button>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-block" onclick="loginUser()" style="margin-bottom:16px">Sign In</button>
+        <p style="text-align:center;font-size:.85rem;color:var(--text-light)">
+          New to NatHerb? <a href="#" onclick="switchAuthTab('register')" style="color:var(--primary);font-weight:600">Create an account</a>
+        </p>
+      </div>
+
+      <!-- REGISTER -->
+      <div id="register-form" style="display:none">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">First Name *</label>
+            <input type="text" class="form-control" id="reg-fname" placeholder="First name">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name</label>
+            <input type="text" class="form-control" id="reg-lname" placeholder="Last name">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address *</label>
+          <input type="email" class="form-control" id="reg-email" placeholder="your@email.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone Number *</label>
+          <input type="tel" class="form-control" id="reg-phone" placeholder="+91 9999999999">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password *</label>
+          <div style="position:relative">
+            <input type="password" class="form-control" id="reg-password" placeholder="Min 8 characters">
+            <button type="button" onclick="togglePwd('reg-password')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--text-light)"><i class="fas fa-eye"></i></button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;font-size:.85rem">
+            <input type="checkbox" id="terms-check" style="accent-color:var(--primary);margin-top:2px">
+            I agree to the <a href="terms.html" style="color:var(--primary)">Terms & Conditions</a> and <a href="privacy.html" style="color:var(--primary)">Privacy Policy</a>
+          </label>
+        </div>
+        <button class="btn btn-primary btn-block" onclick="registerUser()">Create Account</button>
+        <p style="text-align:center;margin-top:14px;font-size:.85rem;color:var(--text-light)">
+          Already have an account? <a href="#" onclick="switchAuthTab('login')" style="color:var(--primary);font-weight:600">Sign In</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD (shown when logged in) -->
+  <div id="dashboard-section" class="account-layout" style="display:none">
+    <!-- SIDEBAR -->
+    <aside class="account-sidebar">
+      <div class="account-avatar" id="dash-avatar">A</div>
+      <div class="account-name" id="dash-name">User Name</div>
+      <div class="account-email" id="dash-email">user@email.com</div>
+      <nav class="account-nav">
+        <a href="#" class="active" onclick="showPanel('dashboard',this)"><i class="fas fa-th-large"></i> Dashboard</a>
+        <a href="#" onclick="showPanel('orders',this)"><i class="fas fa-box"></i> My Orders</a>
+        <a href="wishlist.html"><i class="far fa-heart"></i> Wishlist</a>
+        <a href="#" onclick="showPanel('addresses',this)"><i class="fas fa-map-marker-alt"></i> Addresses</a>
+        <a href="#" onclick="showPanel('profile',this)"><i class="fas fa-user-edit"></i> Edit Profile</a>
+        <a href="support.html"><i class="fas fa-headset"></i> Support</a>
+        <a href="#" onclick="logoutUser()" style="color:var(--red)"><i class="fas fa-sign-out-alt"></i> Logout</a>
+      </nav>
+      <div class="points-badge">
+        <div class="pts" id="dash-points">0</div>
+        <div class="lbl">🌿 Loyalty Points</div>
+      </div>
+    </aside>
+
+    <!-- PANELS -->
+    <div>
+      <!-- Dashboard Overview -->
+      <div id="panel-dashboard" class="dashboard-panel">
+        <div class="dashboard-card">
+          <h3><i class="fas fa-th-large" style="color:var(--primary)"></i> Welcome Back!</h3>
+          <div class="stat-grid">
+            <div class="stat-card"><div class="val" id="total-orders-count">0</div><div class="lbl">Total Orders</div></div>
+            <div class="stat-card"><div class="val" id="wishlist-count-dash">0</div><div class="lbl">Wishlist Items</div></div>
+            <div class="stat-card"><div class="val" id="loyalty-pts">0</div><div class="lbl">Loyalty Points</div></div>
+          </div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <a href="shop.html" class="btn btn-primary btn-sm"><i class="fas fa-shopping-bag"></i> Shop Now</a>
+            <a href="orders.html" class="btn btn-outline-dark btn-sm"><i class="fas fa-box"></i> Track Orders</a>
+            <a href="support.html" class="btn btn-outline-dark btn-sm"><i class="fas fa-headset"></i> Get Help</a>
+          </div>
+        </div>
+        <div class="dashboard-card">
+          <h3><i class="fas fa-box" style="color:var(--primary)"></i> Recent Orders</h3>
+          <div id="recent-orders-list">
+            <div class="loading-spinner"></div>
+          </div>
+          <a href="orders.html" style="font-size:.88rem;color:var(--primary);font-weight:600">View all orders →</a>
+        </div>
+      </div>
+
+      <!-- Orders Panel -->
+      <div id="panel-orders" class="dashboard-panel" style="display:none">
+        <div class="dashboard-card">
+          <h3><i class="fas fa-box" style="color:var(--primary)"></i> All Orders</h3>
+          <div id="all-orders-list">
+            <div class="loading-spinner"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Addresses Panel -->
+      <div id="panel-addresses" class="dashboard-panel" style="display:none">
+        <div class="dashboard-card">
+          <h3><i class="fas fa-map-marker-alt" style="color:var(--primary)"></i> Saved Addresses</h3>
+          <p style="color:var(--text-light);font-size:.9rem;margin-bottom:20px">Manage your delivery addresses for faster checkout.</p>
+          <button class="btn btn-outline-dark btn-sm" onclick="showToast('Address management coming soon!','info')">
+            <i class="fas fa-plus"></i> Add New Address
+          </button>
+          <div id="addresses-list" style="margin-top:16px">
+            <p style="color:var(--text-light);font-size:.88rem">No saved addresses yet.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile Panel -->
+      <div id="panel-profile" class="dashboard-panel" style="display:none">
+        <div class="dashboard-card">
+          <h3><i class="fas fa-user-edit" style="color:var(--primary)"></i> Edit Profile</h3>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">First Name</label><input type="text" class="form-control" id="edit-fname"></div>
+            <div class="form-group"><label class="form-label">Last Name</label><input type="text" class="form-control" id="edit-lname"></div>
+          </div>
+          <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-control" id="edit-email"></div>
+          <div class="form-group"><label class="form-label">Phone</label><input type="tel" class="form-control" id="edit-phone"></div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Skin Type</label>
+              <select class="form-control" id="edit-skin"><option value="">Select</option><option>Normal</option><option>Dry</option><option>Oily</option><option>Combination</option><option>Sensitive</option></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Hair Type</label>
+              <select class="form-control" id="edit-hair"><option value="">Select</option><option>Normal</option><option>Dry</option><option>Oily</option><option>Curly</option><option>Straight</option></select>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="saveProfile()">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-bottom" style="border-top:1px solid rgba(255,255,255,.1);padding:20px 0">
+      <span>© 2024 NatHerb. All rights reserved.</span>
+      <div style="display:flex;gap:16px;font-size:0.8rem"><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a></div>
+    </div>
+  </div>
+</footer>
+
+<div class="toast-container" id="toast-container"></div>
+<script src="js/utils.js"></script>
+<script>
+function switchAuthTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='register')));
+  document.getElementById('login-form').style.display = tab==='login' ? 'block' : 'none';
+  document.getElementById('register-form').style.display = tab==='register' ? 'block' : 'none';
+}
+function togglePwd(id) {
+  const inp = document.getElementById(id);
+  inp.type = inp.type==='password' ? 'text' : 'password';
+}
+function loginUser() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  if (!email||!password) { showToast('Please fill in all fields','error'); return; }
+  // Simulate login (in production, call an auth API)
+  const user = { name: email.split('@')[0].replace(/[^a-zA-Z ]/g,' '), email, phone:'', loyalty_points: 150 };
+  Auth.login(user);
+  showDashboard(user);
+  showToast('Welcome back! 🌿', 'success');
+}
+function registerUser() {
+  const fname = document.getElementById('reg-fname').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const phone = document.getElementById('reg-phone').value.trim();
+  const pwd = document.getElementById('reg-password').value;
+  const terms = document.getElementById('terms-check').checked;
+  if (!fname||!email||!phone||!pwd) { showToast('Please fill all required fields','error'); return; }
+  if (!terms) { showToast('Please agree to Terms & Conditions','error'); return; }
+  if (pwd.length < 8) { showToast('Password must be at least 8 characters','error'); return; }
+  const user = { name: fname + ' ' + (document.getElementById('reg-lname').value||''), email, phone, loyalty_points: 0 };
+  Auth.login(user);
+  // Save to DB
+  apiPost('users', { name:user.name, email, phone, is_active:true, loyalty_points:0 }).catch(()=>{});
+  showDashboard(user);
+  showToast('Account created! Welcome to NatHerb 🌿', 'success');
+}
+function logoutUser() {
+  Auth.logout();
+  document.getElementById('auth-section').style.display = 'block';
+  document.getElementById('dashboard-section').style.display = 'none';
+  showToast('Logged out successfully');
+}
+function showDashboard(user) {
+  document.getElementById('auth-section').style.display = 'none';
+  document.getElementById('dashboard-section').style.display = 'grid';
+  const nameParts = user.name.split(' ');
+  document.getElementById('dash-avatar').textContent = nameParts[0]?.[0]?.toUpperCase() || 'U';
+  document.getElementById('dash-name').textContent = user.name;
+  document.getElementById('dash-email').textContent = user.email;
+  document.getElementById('dash-points').textContent = user.loyalty_points || 0;
+  document.getElementById('loyalty-pts').textContent = user.loyalty_points || 0;
+  document.getElementById('wishlist-count-dash').textContent = Wishlist.count();
+  document.getElementById('edit-fname').value = nameParts[0] || '';
+  document.getElementById('edit-lname').value = nameParts.slice(1).join(' ') || '';
+  document.getElementById('edit-email').value = user.email;
+  document.getElementById('edit-phone').value = user.phone || '';
+  loadRecentOrders(user.email);
+}
+async function loadRecentOrders(email) {
+  try {
+    const res = await apiGet('orders', { search: email, limit: 5 });
+    const orders = res.data || [];
+    document.getElementById('total-orders-count').textContent = orders.length;
+    if (!orders.length) {
+      document.getElementById('recent-orders-list').innerHTML = '<p style="color:var(--text-light);font-size:.88rem;padding:20px 0">No orders yet. <a href="shop.html" style="color:var(--primary)">Start shopping!</a></p>';
+      document.getElementById('all-orders-list').innerHTML = document.getElementById('recent-orders-list').innerHTML;
+      return;
+    }
+    const html = orders.map(o => `
+      <div class="order-row" onclick="window.location='orders.html?order=${o.order_number}'">
+        <div style="flex:1">
+          <div style="font-weight:600;font-size:.9rem">#${o.order_number}</div>
+          <div style="font-size:.78rem;color:var(--text-light)">${o.created_at ? formatDate(o.created_at) : 'Recent'}</div>
+        </div>
+        <div style="font-weight:700;font-size:.92rem">${formatPrice(o.total||0)}</div>
+        <span class="order-status-badge status-${o.status||'pending'}">${(o.status||'pending').charAt(0).toUpperCase()+(o.status||'pending').slice(1)}</span>
+        <i class="fas fa-chevron-right" style="color:var(--text-light);font-size:.8rem"></i>
+      </div>`).join('');
+    document.getElementById('recent-orders-list').innerHTML = html;
+    document.getElementById('all-orders-list').innerHTML = html;
+  } catch { document.getElementById('recent-orders-list').innerHTML = '<p style="color:var(--text-light);font-size:.88rem">Could not load orders.</p>'; }
+}
+function showPanel(panelId, linkEl) {
+  document.querySelectorAll('.dashboard-panel').forEach(p => p.style.display='none');
+  document.getElementById('panel-'+panelId).style.display = 'block';
+  document.querySelectorAll('.account-nav a').forEach(a => a.classList.remove('active'));
+  if (linkEl) linkEl.classList.add('active');
+  return false;
+}
+function saveProfile() {
+  const user = Auth.getUser();
+  if (!user) return;
+  user.name = document.getElementById('edit-fname').value + ' ' + document.getElementById('edit-lname').value;
+  user.phone = document.getElementById('edit-phone').value;
+  Auth.login(user);
+  showToast('Profile updated! 🌿', 'success');
+  showDashboard(user);
+}
+// Init
+const user = Auth.getUser();
+if (user) {
+  showDashboard(user);
+} else {
+  document.getElementById('auth-section').style.display = 'block';
+}
+</script>
+</body>
+</html>
